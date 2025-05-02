@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I",
+      "./external/raylib-5.5/src/",
+      "-o",
+      "floatUML",
+      "src/main.c"
+    ],
+    "directory": "/home/guillemb/Projects/FloatUML",
+    "file": "/home/guillemb/Projects/FloatUML/src/main.c",
+    "output": "/home/guillemb/Projects/FloatUML/floatUML"
+  }
+]
