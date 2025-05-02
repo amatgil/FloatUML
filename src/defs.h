@@ -12,7 +12,7 @@ struct World {
 struct Attribute {
   struct StrSlice nom;
   struct StrSlice tipus;
-  int multiplicitat;
+  int32_t multiplicitat;
 };
 
 struct Attributes {
@@ -30,8 +30,8 @@ struct Classe {
 struct RelacioBinaria {
   struct Classe *a;
   struct Classe *b;
-  int mult_a[2]; // -1 vol dir *
-  int mult_b[2];
+  int32_t mult_a[2]; // -1 vol dir *
+  int32_t mult_b[2];
 };
 
 
@@ -50,7 +50,7 @@ void umla_append(struct Attributes* a, struct Attribute b) {
   if (a->capacity <= new_length) {
     a->capacity *= 2;
     struct Attribute* new_attrs = malloc(a->capacity);
-    for (int i = 0; i < a->len; ++i) new_attrs[i] = a->attrs[i];
+    for (uint32_t i = 0; i < a->len; ++i) new_attrs[i] = a->attrs[i];
     free(a->attrs);
     a->attrs = new_attrs;
   }
@@ -60,10 +60,11 @@ void umla_append(struct Attributes* a, struct Attribute b) {
 
 void umla_print(struct Attributes* as) {
   printf("Attributes:\n");
-  for (int i = 0; i < as->len; ++i) {
+  for (uint32_t i = 0; i < as->len; ++i) {
+    printf("\t");
     umls_print(&as->attrs[i].nom);
     printf(": ");
     umls_print(&as->attrs[i].tipus);
-    printf(" (%d)", as->attrs[i].multiplicitat);
+    printf(" (%d)\n", as->attrs[i].multiplicitat);
   }
 }

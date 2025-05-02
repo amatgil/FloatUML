@@ -18,19 +18,18 @@ struct StrSlice umls_init() {
 }
 
 // modifies a, pushing b onto it
-// ASSUMES b IS NULL TERMINATED
-// WARNING: this blindly trusts that 'length' is valid
+// WARNING: assumes b IS NULL TERMINATED
 void umls_append(struct StrSlice* a, char* b) {
   uint32_t push_length = strlen(b);
   uint32_t new_length = a->len + push_length;
   if (a->capacity < new_length) {
     while (a->capacity <= new_length) a->capacity *= 2;
     char* new_text = malloc(a->capacity);
-    for (int i = 0; i < a->len; ++i) new_text[i] = a->text[i];
+    for (uint32_t i = 0; i < a->len; ++i) new_text[i] = a->text[i];
     free(a->text);
     a->text = new_text;
   }
-  for (int i = 0; i < push_length; ++i) a->text[i + a->len] = b[i];
+  for (uint32_t i = 0; i < push_length; ++i) a->text[i + a->len] = b[i];
   a->len = new_length;
 }
 
@@ -44,7 +43,7 @@ struct StrSlice umls_from(char* s) {
 
 void umls_print(struct StrSlice* s) {
   printf("\"");
-  for (int i = 0; i < s->len; ++i) printf("%c", s->text[i]);
+  for (uint32_t i = 0; i < s->len; ++i) printf("%c", s->text[i]);
   printf("\"");
 }
 
