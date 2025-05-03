@@ -14,6 +14,7 @@ typedef int32_t Bool;
 #define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
 #define TEXTBOX_LEFTPAD 8
 #define TEXTBOX_VERTPAD 5
+#define TEXT_COLOR RAYWHITE
 
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
@@ -128,7 +129,7 @@ int main(void) {
 
             DrawRectangleRec(textarea, BLACK);
             DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
-                     w.style.fontsize, MAROON);
+                     w.style.fontsize, TEXT_COLOR);
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
             int key = GetCharPressed();
@@ -162,7 +163,7 @@ int main(void) {
                   DrawText("_",
                            textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
                            textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
-                           MAROON);
+                           TEXT_COLOR);
 
               free(nulltermed_text);
             }
