@@ -71,7 +71,7 @@ int main(void) {
 
     struct State st = {
         .curr_held = NULL,
-        .textbox_up = true,
+        .textbox_up = false,
         .text_cursor = 0,
         .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA-1] = ' '},
         .text_final_index = 0,
