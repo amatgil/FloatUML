@@ -3,9 +3,11 @@
 #include "umla.h"
 #include "umlc.h"
 #include "umls.h"
+#include "utils.h"
+#include "raymath.h"
 
 void umld_class(struct Classe c, struct Style *style) {
-    uint32_t max = 0;
+    uint32_t max = MeasureTextEx(style->font, c.nom, style->fontsize, 0).x;
     uint32_t nattrs = c.attribs.len;
    
     Vector2 m_colon = MeasureTextEx(style->font, " : ", style->fontsize, 0);
@@ -64,5 +66,20 @@ void umld_class(struct Classe c, struct Style *style) {
     //return (Rectangle){c.pos.x, c.pos.y, max, m_colon.y * (nattrs + 1)};
 }
 
-
+void umld_assoc(struct Classe *a, Vector2 punt_mig, struct Style *style) {
+    umld_class(*a, style);
+    Rectangle arect = umld_rect_of(*a, style);
+    Vector2 pt1 = int_seg_rect(rect_center(arect), punt_mig, arect);
+    Vector2 line = {punt_mig.x, punt_mig.y};
+    Vector2 v = Vector2Subtract(pt1, line);
+    float len = Vector2Length(v);
+    v = Vector2Normalize(v);
+    for (int i = 0; i < 10; i++) {
+        float inc = len / 20;
+        Vector2 suma = Vector2Add(line, (Vector2){v.x*inc, v.y*inc});
+        DrawLineEx(line, suma, 3, BLACK);
+        line = Vector2Add(line, (Vector2){v.x*inc*2, v.y*inc*2});
+    }
+    
+}
 

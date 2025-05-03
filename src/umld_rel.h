@@ -22,4 +22,10 @@ void draw_relation(struct Relacio relacio, struct Style *style) {
         else pt1.y += 2; 
         DrawTextEx(style->font, buff, pt1, 12, 0, BLACK);
     }
+
+
+    
+    if (relacio.associativa != NULL) {
+        umld_assoc(relacio.associativa, punt_mig, style);
+    }
 }
