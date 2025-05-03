@@ -64,7 +64,7 @@ int main(void) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); 
     int screenWidth = 1000;
-    int screenHeight = 1000;
+    int screenHeight = 700;
     float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
     Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
                           screenHeight};
