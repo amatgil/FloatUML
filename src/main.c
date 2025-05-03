@@ -8,8 +8,14 @@
 #include "umlr.h"
 #include "utils.h"
 
-struct HeldState {
-    struct Classe *curr; // NULL if nothing is held
+typedef int32_t Bool;
+
+#define MAX_TEXT_IN_TEXTAREA 3000
+
+struct State {
+    struct Classe *curr_held; // NULL if nothing is held
+    Bool textbox_up;
+    char textbox_text[MAX_TEXT_IN_TEXTAREA];
 };
 
 void startup_example(struct World *w) {
@@ -53,7 +59,8 @@ int main(void) {
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
-    struct HeldState held_state = {.curr = NULL};
+    struct State state = {.curr_held = NULL, .textbox_up = true};
+    Rectangle textarea = { 0, screenHeight/2.0f, screenWidth, screenHeight/2.0f };
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
@@ -62,7 +69,7 @@ int main(void) {
     struct World w;
     startup_example(&w);
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+    while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -87,24 +94,33 @@ int main(void) {
             }
         }
 
+        if (state.textbox_up) {
+            Bool mouseOnText;
+            if (CheckCollisionPointRec(GetMousePosition(), textarea)) mouseOnText = true;
+            else mouseOnText = false;
+            DrawRectangleRec(textarea, BLACK);
+        }
+
+
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
-            if (held_state.curr) {
-                held_state.curr->pos =
-                    Vector2Add(held_state.curr->pos, GetMouseDelta());
+            if (state.curr_held) {
+                state.curr_held->pos =
+                    Vector2Add(state.curr_held->pos, GetMouseDelta());
             } else {
                 Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < w.classes.len; ++i) {
                     Rectangle rect = umld_rect_of(w.classes.cs[i], &w.style);
                     if (CheckCollisionPointRec(mpos, rect)) {
-                        held_state.curr = &w.classes.cs[i];
+                        state.curr_held = &w.classes.cs[i];
                     }
                 }
             }
-        } else {
-            held_state.curr = NULL;
-        }
+        } else state.curr_held = NULL;
+
+        if (IsKeyPressed(KEY_T)) state.textbox_up = !state.textbox_up;
+        
     }
 
     CloseWindow(); // Close window and OpenGL context
