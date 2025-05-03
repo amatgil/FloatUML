@@ -26,19 +26,15 @@ struct State {
     uint64_t frames_counter;
 };
 
-void startup_example(struct World *w) {
-    w->classes = umlc_init();
-    w->relacions = umlrs_init();
-
-    w->style.font = LoadFont("external/Consolas/consolas.ttf");
-    w->style.fontsize = 22;
+struct World startup_example() {
+    struct World w = umlw_init("external/Consolas/consolas.ttf", 22);
 
     struct Classe *a =
-        umlc_append(&w->classes, create_class("Hello", 200, 200, NULL));
+        umlc_append(&w.classes, create_class("Hello", 200, 200, NULL));
     struct Classe *b =
-        umlc_append(&w->classes, create_class("Goodbye", 400, 400, NULL));
+        umlc_append(&w.classes, create_class("Goodbye", 400, 400, NULL));
     struct Classe *c =
-        umlc_append(&w->classes, create_class("Third option", 600, 350, NULL));
+        umlc_append(&w.classes, create_class("Third option", 600, 350, NULL));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
@@ -55,12 +51,13 @@ void startup_example(struct World *w) {
     umlr_append(&r1, a, 7, 10);
     umlr_append(&r1, b, 0, 200);
     umlr_append(&r1, c, 0, -1);
-    umlrs_append(&w->relacions, r1);
+    umlrs_append(&w.relacions, r1);
 
     struct Relacio r2 = umlr_init();
     umlr_append(&r2, b, 1, 10);
     umlr_append(&r2, c, 2, -1);
-    umlrs_append(&w->relacions, r2);
+    umlrs_append(&w.relacions, r2);
+    return w;
 }
 
 int main(void) {
@@ -84,8 +81,7 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    struct World w;
-    startup_example(&w);
+    struct World w = startup_example();
     SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
     uint32_t cellSize = 32;

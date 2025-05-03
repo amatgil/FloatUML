@@ -19,4 +19,14 @@ struct World {
     struct Style style;
 };
 
+struct World umlw_init(char* fontpath, uint32_t fontsize) {
+    struct World w;
+    w.classes = umlc_init();
+    w.relacions = umlrs_init();
+
+    w.style.font = LoadFont(fontpath);
+    w.style.fontsize = fontsize;
+    return w;
+}
+
 #endif
