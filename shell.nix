@@ -20,6 +20,8 @@ let
     xorg.libXinerama
     xorg.libXrandr
     emscripten # web support
+
+    clang-tools
   ];
 in
 pkgs.mkShell {
