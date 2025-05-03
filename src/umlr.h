@@ -29,8 +29,8 @@ struct Relacio umlr_init() {
 // returns a pointer inside the vector
 struct Classe **umlr_append(struct Relacio *a,
                             struct Classe* b,
-                            uint32_t min_multiplicitat,
-                            uint32_t max_multiplicitat) {
+                            int32_t min_multiplicitat,
+                            int32_t max_multiplicitat) {
 
     Vector2 multiplicitat = {.x = min_multiplicitat, .y = max_multiplicitat };
 

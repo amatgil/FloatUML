@@ -11,12 +11,18 @@
 
 typedef int32_t Bool;
 
-#define MAX_TEXT_IN_TEXTAREA 3000
+#define MAX_TEXT_IN_TEXTAREA 2000
+#define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
+#define TEXTBOX_LEFTPAD 8
+#define TEXTBOX_VERTPAD 5
 
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
     char textbox_text[MAX_TEXT_IN_TEXTAREA];
+    uint32_t text_cursor;
+    uint32_t text_final_index;
+    uint64_t frames_counter;
 };
 
 void startup_example(struct World *w) {
@@ -24,7 +30,7 @@ void startup_example(struct World *w) {
     w->relacions = umlrs_init();
 
     w->style.font = LoadFont("external/Consolas/consolas.ttf");
-    w->style.fontsize = 32;
+    w->style.fontsize = 22;
 
     struct Classe *a =
         umlc_append(&w->classes, create_class("Hello", 200, 200, NULL));
@@ -61,8 +67,17 @@ int main(void) {
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
-    struct State state = {.curr_held = NULL, .textbox_up = true};
-    Rectangle textarea = { 0, screenHeight/2.0f, screenWidth, screenHeight/2.0f };
+    struct State st = {
+        .curr_held = NULL,
+        .textbox_up = true,
+        .text_cursor = 0,
+        .textbox_text = {[0 ... 1023] = ' '},
+        .text_final_index = 0,
+    };
+    Rectangle textarea = {screenWidth - (int)((float)screenWidth /
+                                              (float)PERCENTATGE_MIDA_TEXTBOX),
+                          0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
+                          screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
@@ -82,33 +97,76 @@ int main(void) {
         for (int i = 0; i < w.relacions.len; ++i)
             draw_relation(w.relacions.rs[i], &w.style);
 
-        if (state.textbox_up) {
+        if (st.textbox_up) {
             Bool mouseOnText;
             if (CheckCollisionPointRec(GetMousePosition(), textarea)) mouseOnText = true;
             else mouseOnText = false;
+
             DrawRectangleRec(textarea, BLACK);
+            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
+                     w.style.fontsize, MAROON);
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+            int key = GetCharPressed();
+            while (key > 0) {
+                // Only ascii!!
+                if ((key >= 32) && (key <= 125) &&
+                    (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                    st.textbox_text[st.text_cursor] = (char)key;
+                    st.textbox_text[++st.text_final_index] = '\0';
+                    st.text_cursor++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
+                if (st.text_cursor > 0) {
+                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA; ++i) {
+                      st.textbox_text[i-1] = st.textbox_text[i];
+                    }
+                    st.text_cursor--;
+                }
+            }
+
+            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
+              char* nulltermed_text = malloc((st.text_cursor + 1)* sizeof(char));
+              for (int i = 0; i < st.text_cursor; ++i) {
+                nulltermed_text[i] = st.textbox_text[i];
+              }
+              nulltermed_text[st.text_cursor] = '\0';
+              if (((st.frames_counter++ / 20) % 2) == 0)
+                  DrawText("_",
+                           textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
+                           textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
+                           MAROON);
+
+              free(nulltermed_text);
+            }
         }
-
-
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
-            if (state.curr_held) {
-                state.curr_held->pos =
-                    Vector2Add(state.curr_held->pos, GetMouseDelta());
+            if (st.curr_held) {
+                st.curr_held->pos =
+                    Vector2Add(st.curr_held->pos, GetMouseDelta());
             } else {
                 Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < w.classes.len; ++i) {
                     Rectangle rect = umld_rect_of(w.classes.cs[i], &w.style);
                     if (CheckCollisionPointRec(mpos, rect)) {
-                        state.curr_held = &w.classes.cs[i];
+                        st.curr_held = &w.classes.cs[i];
                     }
                 }
             }
-        } else state.curr_held = NULL;
+        } else st.curr_held = NULL;
 
-        if (IsKeyPressed(KEY_T)) state.textbox_up = !state.textbox_up;
-        
+        if (IsKeyPressed(KEY_F10)) st.textbox_up = !st.textbox_up;
+        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor > 0)
+            st.text_cursor--;
+        else if (IsKeyPressed(KEY_RIGHT)
+                 && st.text_cursor < MAX_TEXT_IN_TEXTAREA
+                 && st.text_cursor < st.text_final_index)
+            st.text_cursor++;
     }
 
     CloseWindow(); // Close window and OpenGL context
