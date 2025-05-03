@@ -10,6 +10,7 @@
 #include "umlr.h"
 #include "umls.h"
 #include "utils.h"
+#include <stdint.h>
 
 typedef int32_t Bool;
 
@@ -23,7 +24,8 @@ struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
     char textbox_text[MAX_TEXT_IN_TEXTAREA];
-    uint32_t text_cursor;
+    uint32_t text_cursor_col;
+    uint32_t text_cursor_line;
     uint32_t text_final_index;
     uint64_t frames_counter;
 };
@@ -76,7 +78,8 @@ int main(void) {
     struct State st = {
         .curr_held = NULL,
         .textbox_up = false,
-        .text_cursor = 0,
+        .text_cursor_col = 0,
+        .text_cursor_line = 0,
         .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA - 1] = ' '},
         .text_final_index = 0,
     };
@@ -134,23 +137,29 @@ int main(void) {
             while (key > 0) {
                 // Only ascii!!
                 if ((key >= 32) && (key <= 125) &&
-                    (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                    (st.text_cursor_col < MAX_TEXT_IN_TEXTAREA)) {
                     update = 1;
-                    st.textbox_text[st.text_cursor] = (char)key;
+                    st.textbox_text[st.text_cursor_col] = (char)key;
                     st.textbox_text[++st.text_final_index] = '\0';
-                    st.text_cursor++;
+                    st.text_cursor_col++;
                 }
                 key = GetCharPressed();
             }
 
+            if (IsKeyPressed(KEY_ENTER)) {
+                update = 1;
+                st.textbox_text[st.text_cursor_col] = (char)'\n';
+                st.textbox_text[++st.text_final_index] = '\0';
+                st.text_cursor_col++;
+              }
             if (IsKeyPressed(KEY_BACKSPACE) ||
                 IsKeyPressedRepeat(KEY_BACKSPACE)) {
-                if (st.text_cursor > 0) {
-                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA;
+                if (st.text_cursor_col > 0) {
+                    for (int i = st.text_cursor_col; i < MAX_TEXT_IN_TEXTAREA;
                          ++i) {
                         st.textbox_text[i - 1] = st.textbox_text[i];
                     }
-                    st.text_cursor--;
+                    st.text_cursor_col--;
                 }
             }
 
@@ -168,19 +177,20 @@ int main(void) {
                 }
             }
 
-            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
-                char *nulltermed_text =
-                    malloc((st.text_cursor + 1) * sizeof(char));
-                for (int i = 0; i < st.text_cursor; ++i) {
+            if (st.text_cursor_col < MAX_TEXT_IN_TEXTAREA) {
+                char *nulltermed_text = malloc((st.text_cursor_col + 1) * sizeof(char));
+                for (int i = 0; i < st.text_cursor_col; ++i) {
                     nulltermed_text[i] = st.textbox_text[i];
                 }
-                nulltermed_text[st.text_cursor] = '\0';
-                if (((st.frames_counter++ / 20) % 2) == 0)
+                nulltermed_text[st.text_cursor_col] = '\0';
+                Vector2 textsize = MeasureTextEx(w.style.font, nulltermed_text, w.style.fontsize, 0.0);
+                if (((st.frames_counter++ / 20) % 2) == 0) {
                     DrawText("_",
-                             textarea.x + TEXTBOX_LEFTPAD +
-                                 MeasureText(nulltermed_text, w.style.fontsize),
-                             textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
+                             textarea.x + TEXTBOX_LEFTPAD + textsize.x,
+                             textarea.y + 2*TEXTBOX_VERTPAD + textsize.y - w.style.fontsize,
+                             w.style.fontsize,
                              TEXT_COLOR);
+                }
 
                 free(nulltermed_text);
             }
@@ -212,12 +222,12 @@ int main(void) {
 
         if (IsKeyPressed(KEY_F10))
             st.textbox_up = !st.textbox_up;
-        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor > 0)
-            st.text_cursor--;
+        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor_col > 0)
+            st.text_cursor_col--;
         else if (IsKeyPressed(KEY_RIGHT) &&
-                 st.text_cursor < MAX_TEXT_IN_TEXTAREA &&
-                 st.text_cursor < st.text_final_index)
-            st.text_cursor++;
+                 st.text_cursor_col < MAX_TEXT_IN_TEXTAREA &&
+                 st.text_cursor_col < st.text_final_index)
+            st.text_cursor_col++;
 
         screenHeight = new_height;
         screenWidth = new_width;
