@@ -115,7 +115,7 @@ struct StrSlice umlss_readw(struct StrSliceStream *stream) {
         c = umlss_read(stream);
     }
 
-    int end = stream->ptr - 1;
+    int end = stream->ptr - 2;
 
     return umls_substr(&stream->str, start, end);
 }

@@ -20,12 +20,15 @@ struct Classe parse(struct StrSlice *a) {
 
             struct StrSlice attribname = umlss_readw(&b);
             while (!umls_cmp_cstr(&attribname, "}")) {
-                name = umlss_readw(&b);
+                printf("read attrib name: %s\n", attribname);
                 struct StrSlice colon = umlss_readw(&b);
                 if (!umls_cmp_cstr(&colon, ":")) {
                     printf("Error de compilació near");
                     printf(name.text);
                     printf("\n");
+                    printf("Unexpedted: %s", colon.text);
+                    printf("\n");
+                    break;
                 }
 
                 struct StrSlice type = umlss_readw(&b);
@@ -34,6 +37,7 @@ struct Classe parse(struct StrSlice *a) {
                     create_attribute(name.text, type.text, 0, 0);
 
                 umla_append(&new.attribs, nattrb);
+                attribname = umlss_readw(&b);
             }
 
             return new;

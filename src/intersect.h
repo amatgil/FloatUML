@@ -1,6 +1,9 @@
 #include "raylib.h"
 #include <math.h>
 
+#ifndef INTER
+#define INTER
+
 struct Vector2 int_seg_rect(Vector2 start, Vector2 end, Rectangle rect) {
     float m = (end.y - start.y) / (end.x - start.x);
     float n = start.y - start.x * m;
@@ -34,3 +37,5 @@ struct Vector2 int_seg_rect(Vector2 start, Vector2 end, Rectangle rect) {
     bottomp.y = rect.y + rect.height;
     return bottomp;
 }
+
+#endif
