@@ -11,11 +11,14 @@
 typedef int32_t Bool;
 
 #define MAX_TEXT_IN_TEXTAREA 3000
+#define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
 
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
     char textbox_text[MAX_TEXT_IN_TEXTAREA];
+    uint32_t text_cursor;
+    uint64_t frames_counter;
 };
 
 void startup_example(struct World *w) {
@@ -23,7 +26,7 @@ void startup_example(struct World *w) {
     w->relacions = umlrs_init();
 
     w->style.font = LoadFont("external/Consolas/consolas.ttf");
-    w->style.fontsize = 32;
+    w->style.fontsize = 22;
 
     struct Classe *a =
         umlc_append(&w->classes, create_class("Hello", 200, 200, NULL));
@@ -59,8 +62,14 @@ int main(void) {
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
-    struct State state = {.curr_held = NULL, .textbox_up = true};
-    Rectangle textarea = { 0, screenHeight/2.0f, screenWidth, screenHeight/2.0f };
+    struct State st = {
+        .curr_held = NULL,
+        .textbox_up = true,
+        .text_cursor = 0,
+        .textbox_text = {[0 ... 1023] = ' '},
+    };
+    Rectangle textarea = {screenWidth - screenWidth / PERCENTATGE_MIDA_TEXTBOX, 0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
+                          screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
@@ -94,32 +103,64 @@ int main(void) {
             }
         }
 
-        if (state.textbox_up) {
+        if (st.textbox_up) {
             Bool mouseOnText;
             if (CheckCollisionPointRec(GetMousePosition(), textarea)) mouseOnText = true;
             else mouseOnText = false;
-            DrawRectangleRec(textarea, BLACK);
-        }
 
+            DrawRectangleRec(textarea, BLACK);
+            DrawText(st.textbox_text, (int)textarea.x + 5, (int)textarea.y + 8,
+                     w.style.fontsize, MAROON);
+            if (mouseOnText) {
+                SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+                int key = GetCharPressed();
+                while (key > 0) {
+                    // Only ascii!!
+                    if ((key >= 32) && (key <= 125) &&
+                        (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                        st.textbox_text[st.text_cursor] = (char)key;
+                        st.textbox_text[st.text_cursor + 1] = '\0';
+                        st.text_cursor++;
+                    }
+                    key = GetCharPressed();
+                }
+
+                if (IsKeyPressed(KEY_BACKSPACE)) {
+                    if (st.text_cursor > 0) {
+                        st.text_cursor--;
+                        st.textbox_text[st.text_cursor] = '\0';
+                    }
+                }
+            } else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
+                if (((st.frames_counter++ / 20) % 2) == 0)
+                    DrawText("_",
+                             textarea.x + 8 +
+                                 MeasureText(st.textbox_text, w.style.fontsize),
+                             textarea.y + 12, w.style.fontsize, MAROON);
+            }
+        }
 
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
-            if (state.curr_held) {
-                state.curr_held->pos =
-                    Vector2Add(state.curr_held->pos, GetMouseDelta());
+            if (st.curr_held) {
+                st.curr_held->pos =
+                    Vector2Add(st.curr_held->pos, GetMouseDelta());
             } else {
                 Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < w.classes.len; ++i) {
                     Rectangle rect = umld_rect_of(w.classes.cs[i], &w.style);
                     if (CheckCollisionPointRec(mpos, rect)) {
-                        state.curr_held = &w.classes.cs[i];
+                        st.curr_held = &w.classes.cs[i];
                     }
                 }
             }
-        } else state.curr_held = NULL;
+        } else st.curr_held = NULL;
 
-        if (IsKeyPressed(KEY_T)) state.textbox_up = !state.textbox_up;
+        if (IsKeyPressed(KEY_F10)) st.textbox_up = !st.textbox_up;
         
     }
 
