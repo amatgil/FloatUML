@@ -5,6 +5,7 @@
 #include "umla.h"
 #include "umlc.h"
 #include "umld_class.h"
+#include "umld_rel.h"
 #include "umlr.h"
 #include "utils.h"
 
@@ -46,6 +47,7 @@ void startup_example(struct World *w) {
     struct Relacio r1 = umlr_init();
     umlr_append(&r1, a, 7, 10);
     umlr_append(&r1, b, 0, 200);
+    umlr_append(&r1, c, 0, -1);
     umlrs_append(&w->relacions, r1);
 
     struct Relacio r2 = umlr_init();
@@ -77,22 +79,8 @@ int main(void) {
         for (int i = 0; i < w.classes.len; ++i)
             umld_class(w.classes.cs[i], &w.style);
 
-        for (int i = 0; i < w.relacions.len; ++i) {
-            struct Relacio r = w.relacions.rs[i];
-            if (r.len == 2) {
-                struct Classe *a = r.cs[0];
-                struct Classe *b = r.cs[1];
-                Rectangle arect = umld_rect_of(*a, &w.style);
-                Rectangle brect = umld_rect_of(*b, &w.style);
-                Vector2 pt1 =
-                    int_seg_rect(rect_center(arect), rect_center(brect), arect);
-
-                Vector2 pt2 =
-                    int_seg_rect(rect_center(arect), rect_center(brect), brect);
-
-                DrawLineEx(pt1, pt2, 3, BLACK);
-            }
-        }
+        for (int i = 0; i < w.relacions.len; ++i)
+            draw_relation(w.relacions.rs[i], &w.style);
 
         if (state.textbox_up) {
             Bool mouseOnText;
