@@ -44,13 +44,13 @@ void startup_example(struct World *w) {
     umla_append(&c->attribs, create_attribute("existencia", "Int", 0, -1));
 
     struct Relacio r1 = umlr_init();
-    umlr_append(&r1, a);
-    umlr_append(&r1, b);
+    umlr_append(&r1, a, 7, 10);
+    umlr_append(&r1, b, 0, 200);
     umlrs_append(&w->relacions, r1);
 
     struct Relacio r2 = umlr_init();
-    umlr_append(&r2, b);
-    umlr_append(&r2, c);
+    umlr_append(&r2, b, 1, 10);
+    umlr_append(&r2, c, 2, -1);
     umlrs_append(&w->relacions, r2);
 }
 
