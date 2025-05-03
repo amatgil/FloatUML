@@ -1,23 +1,25 @@
 #include "defs.h"
-#include "raylib.h"
 #include "umla.h"
+#include "umlr.h"
+#include "utils.h"
+#include "intersect.h"
 
-void draw_relation(struct RelacioBinaria r, Rectangle rec1, Rectangle rec2) {
-    uint32_t h_a = (r.a->attribs.len + 1) * mida + 3;
-    uint32_t h_b = (r.b->attribs.len + 1) * mida + 3;
-    uint32_t w_a = 0, w_b = 0;
-    for (uint32_t i = 0; i < r.a->attribs.len; ++i) {
-        int lenght = (r.a->attribs.attrs[i].nom.len +
-                      r.a->attribs.attrs[i].tipus.len + 1);
-        if (lenght > w_a)
-            w_a = lenght;
+void draw_relation(struct Relacio relacio, struct Style *style) {
+    Vector2 punt_mig = calcul_punt_mig (relacio, style);
+    int lenght = relacio.len;
+    for (int i = 0; i < lenght; ++i)
+    {
+        Rectangle arect = umld_rect_of(*relacio.cs[i], style);
+        Vector2 pt1 =
+                  int_seg_rect(rect_center(arect), punt_mig, arect);
+        DrawLineEx(pt1,punt_mig,3,BLACK);
+        char buff[2048];
+        if (relacio.multiplicitats[i].y == (float)-1.) sprintf(buff,"%.0f..*", relacio.multiplicitats[i].x);
+        else sprintf(buff,"%.0f..%.0f", relacio.multiplicitats[i].x, relacio.multiplicitats[i].y);
+        if (punt_mig.x-pt1.x < 0) pt1.x -= strlen(buff)*7;
+        else pt1.x += 2;
+        if (punt_mig.y-pt1.y < 0) pt1.y -= strlen(buff)*2.5;
+        else pt1.y += 2; 
+        DrawTextEx(style->font, buff, pt1, 12, 0, BLACK);
     }
-    for (uint32_t i = 0; i < r.b->attribs.len; ++i) {
-        int lenght = (r.b->attribs.attrs[i].nom.len +
-                      r.b->attribs.attrs[i].tipus.len + 1);
-        if (lenght > w_b)
-            w_b = lenght;
-    }
-    DrawLine(r.a->pos.x + w_a * mida / 2, r.a->pos.y + h_a * mida / 2,
-             r.b->pos.x + w_b * mida / 2, r.b->pos.y + h_b * mida / 2, BLACK);
 }

@@ -5,16 +5,33 @@
 #include "umla.h"
 #include "umlc.h"
 #include "umld_class.h"
+#include "umld_rel.h"
 #include "umlr.h"
 #include "utils.h"
 
-struct HeldState {
-    struct Classe *curr; // NULL if nothing is held
+typedef int32_t Bool;
+
+#define MAX_TEXT_IN_TEXTAREA 2000
+#define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
+#define TEXTBOX_LEFTPAD 8
+#define TEXTBOX_VERTPAD 5
+#define TEXT_COLOR RAYWHITE
+
+struct State {
+    struct Classe *curr_held; // NULL if nothing is held
+    Bool textbox_up;
+    char textbox_text[MAX_TEXT_IN_TEXTAREA];
+    uint32_t text_cursor;
+    uint32_t text_final_index;
+    uint64_t frames_counter;
 };
 
 void startup_example(struct World *w) {
+    w->classes = umlc_init();
+    w->relacions = umlrs_init();
+
     w->style.font = LoadFont("external/Consolas/consolas.ttf");
-    w->style.fontsize = 32;
+    w->style.fontsize = 22;
 
     struct Classe *a =
         umlc_append(&w->classes, create_class("Hello", 200, 200, NULL));
@@ -35,13 +52,14 @@ void startup_example(struct World *w) {
     umla_append(&c->attribs, create_attribute("existencia", "Int", 0, -1));
 
     struct Relacio r1 = umlr_init();
-    umlr_append(&r1, a);
-    umlr_append(&r1, b);
+    umlr_append(&r1, a, 7, 10);
+    umlr_append(&r1, b, 0, 200);
+    umlr_append(&r1, c, 0, -1);
     umlrs_append(&w->relacions, r1);
 
     struct Relacio r2 = umlr_init();
-    umlr_append(&r2, b);
-    umlr_append(&r2, c);
+    umlr_append(&r2, b, 1, 10);
+    umlr_append(&r2, c, 2, -1);
     umlrs_append(&w->relacions, r2);
 }
 
@@ -50,7 +68,17 @@ int main(void) {
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
-    struct HeldState held_state = {.curr = NULL};
+    struct State st = {
+        .curr_held = NULL,
+        .textbox_up = true,
+        .text_cursor = 0,
+        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA-1] = ' '},
+        .text_final_index = 0,
+    };
+    
+    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
+                          screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
@@ -58,50 +86,100 @@ int main(void) {
 
     struct World w;
     startup_example(&w);
+    SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
-    while (!WindowShouldClose()) // Detect window close button or ESC key
+    uint32_t cellSize = 32;
+
+    while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
+        for (int x = 0; x <= screenWidth; x += cellSize) {
+            DrawLine(x, 0, x, screenHeight, LIGHTGRAY);
+        }
+
+        // Dibujar líneas horizontales
+        for (int y = 0; y <= screenHeight; y += cellSize) {
+            DrawLine(0, y, screenWidth, y, LIGHTGRAY);
+        }
+
         for (int i = 0; i < w.classes.len; ++i)
             umld_class(w.classes.cs[i], &w.style);
 
-        for (int i = 0; i < w.relacions.len; ++i) {
-            struct Relacio r = w.relacions.rs[i];
-            if (r.len == 2) {
-                struct Classe *a = r.cs[0];
-                struct Classe *b = r.cs[1];
-                Rectangle arect = umld_rect_of(*a, &w.style);
-                Rectangle brect = umld_rect_of(*b, &w.style);
-                Vector2 pt1 =
-                    int_seg_rect(rect_center(arect), rect_center(brect), arect);
+        for (int i = 0; i < w.relacions.len; ++i)
+            draw_relation(w.relacions.rs[i], &w.style);
 
-                Vector2 pt2 =
-                    int_seg_rect(rect_center(arect), rect_center(brect), brect);
+        if (st.textbox_up) {
+            Bool mouseOnText;
+            if (CheckCollisionPointRec(GetMousePosition(), textarea)) mouseOnText = true;
+            else mouseOnText = false;
 
-                DrawLineEx(pt1, pt2, 3, BLACK);
+            DrawRectangleRec(textarea, BLACK);
+            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
+                     w.style.fontsize, TEXT_COLOR);
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+            int key = GetCharPressed();
+            while (key > 0) {
+                // Only ascii!!
+                if ((key >= 32) && (key <= 125) &&
+                    (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                    st.textbox_text[st.text_cursor] = (char)key;
+                    st.textbox_text[++st.text_final_index] = '\0';
+                    st.text_cursor++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
+                if (st.text_cursor > 0) {
+                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA; ++i) {
+                      st.textbox_text[i-1] = st.textbox_text[i];
+                    }
+                    st.text_cursor--;
+                }
+            }
+
+            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
+              char* nulltermed_text = malloc((st.text_cursor + 1)* sizeof(char));
+              for (int i = 0; i < st.text_cursor; ++i) {
+                nulltermed_text[i] = st.textbox_text[i];
+              }
+              nulltermed_text[st.text_cursor] = '\0';
+              if (((st.frames_counter++ / 20) % 2) == 0)
+                  DrawText("_",
+                           textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
+                           textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
+                           TEXT_COLOR);
+
+              free(nulltermed_text);
             }
         }
-
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
-            if (held_state.curr) {
-                held_state.curr->pos =
-                    Vector2Add(held_state.curr->pos, GetMouseDelta());
+            if (st.curr_held) {
+                st.curr_held->pos =
+                    Vector2Add(st.curr_held->pos, GetMouseDelta());
             } else {
                 Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < w.classes.len; ++i) {
                     Rectangle rect = umld_rect_of(w.classes.cs[i], &w.style);
                     if (CheckCollisionPointRec(mpos, rect)) {
-                        held_state.curr = &w.classes.cs[i];
+                        st.curr_held = &w.classes.cs[i];
                     }
                 }
             }
-        } else {
-            held_state.curr = NULL;
-        }
+        } else st.curr_held = NULL;
+
+        if (IsKeyPressed(KEY_F10)) st.textbox_up = !st.textbox_up;
+        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor > 0)
+            st.text_cursor--;
+        else if (IsKeyPressed(KEY_RIGHT)
+                 && st.text_cursor < MAX_TEXT_IN_TEXTAREA
+                 && st.text_cursor < st.text_final_index)
+            st.text_cursor++;
     }
 
     CloseWindow(); // Close window and OpenGL context
