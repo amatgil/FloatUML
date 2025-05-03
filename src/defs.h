@@ -11,21 +11,6 @@ struct Style {
     int32_t fontsize;
 };
 
-struct Classe {
-    char* nom; // Null terminated
-    struct Attributes attribs;
-    Vector2 pos;
-};
-
-struct Classe create_class(char *nom, int32_t posx, int32_t posy) {
-    struct Classe a;
-    a.nom = nom;
-    a.attribs = umla_init();
-    a.pos.x = posx;
-    a.pos.y = posy;
-    return a;
-}
-
 struct RelacioBinaria {
     struct Classe *a;
     struct Classe *b;
