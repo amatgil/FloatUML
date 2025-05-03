@@ -69,7 +69,7 @@ int main(void) {
         .curr_held = NULL,
         .textbox_up = true,
         .text_cursor = 0,
-        .textbox_text = {[0 ... 1023] = ' '},
+        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA-1] = ' '},
         .text_final_index = 0,
     };
     
