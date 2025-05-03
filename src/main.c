@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "umla.h"
+#include "umlr.h"
 #include "umlc.h"
 #include "umld_class.h"
 #include "utils.h"
@@ -28,6 +29,8 @@ int main(void) {
     style.fontsize = 32;
 
     struct Classes classes = umlc_init();
+    struct Relacions relacions = umlrs_init();
+
     struct Classe* a = umlc_append(&classes, create_class("Hello", 200, 200));
     struct Classe* b = umlc_append(&classes, create_class("Goodbye", 400, 400));
     struct Classe* c = umlc_append(&classes, create_class("Third option", 600, 350));
@@ -36,13 +39,18 @@ int main(void) {
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("edat", "Int", 1, 1));
 
-
     umla_append(&b->attribs, create_attribute("skjdhf", "String", 0, -1));
     umla_append(&b->attribs, create_attribute("very yes", "String", 0, -1));
     umla_append(&b->attribs, create_attribute("wahooo", "Data", 1, 1));
 
     umla_append(&c->attribs, create_attribute("dia", "String", 0, -1));
     umla_append(&c->attribs, create_attribute("existencia", "Int", 0, -1));
+
+    struct Relacio r1 = umlr_init();
+    umlr_append(&r1, a);
+    umlr_append(&r1, b);
+    umlrs_append(&relacions, r1);
+
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
@@ -51,19 +59,25 @@ int main(void) {
 
         ClearBackground(RAYWHITE);
 
-        for (int i = 0; i < classes.len; ++i) {
-          umld_class(classes.cs[i], &style);
+        for (int i = 0; i < classes.len; ++i) umld_class(classes.cs[i], &style);
+
+        for (int i = 0; i < relacions.len; ++i) {
+          struct Relacio r = relacions.rs[i];
+          if (r.len == 2) {
+              struct Classe *a = r.cs[0];
+              struct Classe *b = r.cs[1];
+              Rectangle arect = umld_rect_of(*a, &style);
+              Rectangle brect = umld_rect_of(*b, &style);
+              Vector2 pt1 =
+                  int_seg_rect(rect_center(arect), rect_center(brect), arect);
+
+              Vector2 pt2 =
+                  int_seg_rect(rect_center(arect), rect_center(brect), brect);
+
+              DrawLineEx(pt1, pt2, 3, BLACK);
+          }
         }
 
-        /*
-        Vector2 pt1 =
-            int_seg_rect(rect_center(arect), rect_center(brect), arect);
-
-        Vector2 pt2 =
-            int_seg_rect(rect_center(arect), rect_center(brect), brect);
-
-        DrawLineEx(pt1, pt2, 3, BLACK);
-        */
 
         EndDrawing();
 
