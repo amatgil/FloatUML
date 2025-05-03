@@ -11,11 +11,4 @@ struct Style {
     int32_t fontsize;
 };
 
-struct RelacioBinaria {
-    struct Classe *a;
-    struct Classe *b;
-    int32_t mult_a[2]; // -1 vol dir *
-    int32_t mult_b[2];
-};
-
 #endif
