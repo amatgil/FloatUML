@@ -8,6 +8,7 @@ struct Classe {
     char *nom; // Null terminated
     struct Attributes attribs;
     Vector2 pos;
+    struct Classe* superclasse;
 };
 
 struct Classes {
@@ -43,12 +44,13 @@ struct Classe *umlc_append(struct Classes *a, struct Classe b) {
     return &a->cs[a->len - 1];
 }
 
-struct Classe create_class(char *nom, int32_t posx, int32_t posy) {
+struct Classe create_class(char *nom, int32_t posx, int32_t posy, struct Classe* superclasse) {
     struct Classe a;
     a.nom = nom;
     a.attribs = umla_init();
     a.pos.x = posx;
     a.pos.y = posy;
+    a.superclasse = superclasse;
     return a;
 }
 

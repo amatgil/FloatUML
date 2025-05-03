@@ -31,9 +31,9 @@ int main(void) {
     struct Classes classes = umlc_init();
     struct Relacions relacions = umlrs_init();
 
-    struct Classe* a = umlc_append(&classes, create_class("Hello", 200, 200));
-    struct Classe* b = umlc_append(&classes, create_class("Goodbye", 400, 400));
-    struct Classe* c = umlc_append(&classes, create_class("Third option", 600, 350));
+    struct Classe* a = umlc_append(&classes, create_class("Hello", 200, 200, NULL));
+    struct Classe* b = umlc_append(&classes, create_class("Goodbye", 400, 400, NULL));
+    struct Classe* c = umlc_append(&classes, create_class("Third option", 600, 350, NULL));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
@@ -88,7 +88,6 @@ int main(void) {
             if (held_state.curr) {
                 held_state.curr->pos = Vector2Add(held_state.curr->pos, GetMouseDelta());
             } else {
-                // Nothing is currently held
                 Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < classes.len; ++i) {
                   Rectangle rect = umld_rect_of(classes.cs[i], &style);
