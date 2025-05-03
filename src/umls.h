@@ -31,7 +31,7 @@ void umls_append(struct StrSlice *a, char *b) {
     if (a->capacity < new_length) {
         while (a->capacity <= new_length)
             a->capacity *= 2;
-        char *new_text = malloc(a->capacity);
+        char *new_text = malloc(a->capacity + 1);
         for (uint32_t i = 0; i < a->len; ++i)
             new_text[i] = a->text[i];
         free(a->text);
@@ -39,6 +39,7 @@ void umls_append(struct StrSlice *a, char *b) {
     }
     for (uint32_t i = 0; i < push_length; ++i)
         a->text[i + a->len] = b[i];
+    a->text[a->len + 1] = '\0';
     a->len = new_length;
 }
 
