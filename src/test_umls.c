@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     struct StrSliceStream b = umlss_init(&a);
 
     printf(umlss_readw(&b).text);
+    printf("\n");
 
     return EXIT_SUCCESS;
 }
