@@ -8,13 +8,19 @@ int main(int argc, char *argv[]) {
     printf(a.text);
     printf("\n");
 
+    struct StrSlice c = umls_from("world!");
+    printf("%d\n", umls_cmp_cstr(&c, "world!"));
+
     struct StrSliceStream b = umlss_init(&a);
 
-    printf("%c", umlss_read(&b));
-
+    printf("Read Caracter: %c\n", umlss_read(&b));
+    printf("Read Word: ");
     printf(umlss_readw(&b).text);
     printf("\n");
-    printf(umlss_readw(&b).text);
+    struct StrSlice word = umlss_readw(&b);
+    printf("Length: %d\n", word.len);
+    printf("Cmp result: %d\n", umls_cmp_cstr(&word, "world!"));
+    printf(word.text);
     printf("\n");
 
     return EXIT_SUCCESS;
