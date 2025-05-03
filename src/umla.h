@@ -2,13 +2,15 @@
 #define UMLA_H
 #include "umls.h"
 #include <stdint.h>
+#include <stdio.h>
 
 /* ========== Pseudonamespace: umla ========== */
 
 struct Attribute {
     struct StrSlice nom;
     struct StrSlice tipus;
-    int32_t multiplicitat;
+    int32_t multmin;
+    int32_t multmax;
 };
 
 struct Attributes {
@@ -16,6 +18,17 @@ struct Attributes {
     uint32_t len;
     uint32_t capacity;
 };
+
+struct Attribute create_attribute(char *nom, char *tipus, int32_t multmin,
+                                  int32_t multmax) {
+    struct Attribute a;
+    a.nom = umls_from(nom);
+    a.tipus = umls_from(tipus);
+    a.multmin = multmin;
+    a.multmax = multmax;
+
+    return a;
+}
 
 // Returns an empty attribute
 struct Attributes umla_init() {
@@ -47,10 +60,10 @@ void umla_print(struct Attributes *as) {
     printf("Attributes:\n");
     for (uint32_t i = 0; i < as->len; ++i) {
         printf("\t");
-        umls_print(&as->attrs[i].nom);
+        printf(as->attrs[i].nom.text);
         printf(": ");
-        umls_print(&as->attrs[i].tipus);
-        printf(" (%d)\n", as->attrs[i].multiplicitat);
+        printf(as->attrs[i].tipus.text);
+        printf(" (%d..%d)\n", as->attrs[i].multmin, as->attrs[i].multmax);
     }
 }
 

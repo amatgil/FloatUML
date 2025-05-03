@@ -6,11 +6,25 @@
 #ifndef DEFS
 #define DEFS
 
+struct Style {
+    Font font;
+    int32_t fontsize;
+};
+
 struct Classe {
     struct StrSlice nom;
     struct Attributes attribs;
     Vector2 pos;
 };
+
+struct Classe create_class(char *nom, int32_t posx, int32_t posy) {
+    struct Classe a;
+    a.nom = umls_from(nom);
+    a.attribs = umla_init();
+    a.pos.x = posx;
+    a.pos.y = posy;
+    return a;
+}
 
 struct RelacioBinaria {
     struct Classe *a;

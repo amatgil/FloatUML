@@ -2,7 +2,6 @@
 #define UMLS_H
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,7 +19,19 @@ struct StrSlice umls_init() {
     struct StrSlice r = {.text = malloc(default_capacity),
                          .len = 0,
                          .capacity = default_capacity};
+    r.text[0] = 0;
     return r;
+}
+
+void umls_resize(struct StrSlice *a, int n) {
+    if (a->capacity < n) {
+        while (a->capacity <= n)
+            a->capacity *= 2;
+        char *new_text = malloc(a->capacity + 1);
+        strncpy(new_text, a->text, a->len);
+        free(a->text);
+        a->text = new_text;
+    }
 }
 
 // modifies a, pushing b onto it
@@ -28,18 +39,8 @@ struct StrSlice umls_init() {
 void umls_append(struct StrSlice *a, char *b) {
     uint32_t push_length = strlen(b);
     uint32_t new_length = a->len + push_length;
-    if (a->capacity < new_length) {
-        while (a->capacity <= new_length)
-            a->capacity *= 2;
-        char *new_text = malloc(a->capacity + 1);
-        for (uint32_t i = 0; i < a->len; ++i)
-            new_text[i] = a->text[i];
-        free(a->text);
-        a->text = new_text;
-    }
-    for (uint32_t i = 0; i < push_length; ++i)
-        a->text[i + a->len] = b[i];
-    a->text[a->len + 1] = '\0';
+    umls_resize(a, new_length);
+    strcat(a->text, b);
     a->len = new_length;
 }
 
@@ -48,11 +49,6 @@ struct StrSlice umls_from(char *s) {
     struct StrSlice r = umls_init();
     umls_append(&r, s);
     return r;
-}
-
-void umls_print(struct StrSlice *s) {
-    for (uint32_t i = 0; i < s->len; ++i)
-        printf("%c", s->text[i]);
 }
 
 int umls_cmp(struct StrSlice *a, struct StrSlice *b) {
@@ -78,6 +74,7 @@ struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
     }
 
     struct StrSlice new = umls_init();
+
     return new;
 }
 
