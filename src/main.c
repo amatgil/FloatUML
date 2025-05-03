@@ -13,6 +13,9 @@ struct HeldState {
 };
 
 void startup_example(struct World *w) {
+    w->classes = umlc_init();
+    w->relacions = umlrs_init();
+
     w->style.font = LoadFont("external/Consolas/consolas.ttf");
     w->style.fontsize = 32;
 
