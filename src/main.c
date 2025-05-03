@@ -8,6 +8,7 @@
 #include "utils.h"
 
 int main(void) {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
