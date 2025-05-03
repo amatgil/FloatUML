@@ -10,14 +10,17 @@
 
 typedef int32_t Bool;
 
-#define MAX_TEXT_IN_TEXTAREA 3000
+#define MAX_TEXT_IN_TEXTAREA 2000
 #define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
+#define TEXTBOX_LEFTPAD 8
+#define TEXTBOX_VERTPAD 5
 
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
     char textbox_text[MAX_TEXT_IN_TEXTAREA];
     uint32_t text_cursor;
+    uint32_t text_final_index;
     uint64_t frames_counter;
 };
 
@@ -67,8 +70,11 @@ int main(void) {
         .textbox_up = true,
         .text_cursor = 0,
         .textbox_text = {[0 ... 1023] = ' '},
+        .text_final_index = 0,
     };
-    Rectangle textarea = {screenWidth - screenWidth / PERCENTATGE_MIDA_TEXTBOX, 0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
+    Rectangle textarea = {screenWidth - (int)((float)screenWidth /
+                                              (float)PERCENTATGE_MIDA_TEXTBOX),
+                          0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
                           screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
@@ -109,40 +115,46 @@ int main(void) {
             else mouseOnText = false;
 
             DrawRectangleRec(textarea, BLACK);
-            DrawText(st.textbox_text, (int)textarea.x + 5, (int)textarea.y + 8,
+            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
                      w.style.fontsize, MAROON);
-            if (mouseOnText) {
-                SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
-                int key = GetCharPressed();
-                while (key > 0) {
-                    // Only ascii!!
-                    if ((key >= 32) && (key <= 125) &&
-                        (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
-                        st.textbox_text[st.text_cursor] = (char)key;
-                        st.textbox_text[st.text_cursor + 1] = '\0';
-                        st.text_cursor++;
-                    }
-                    key = GetCharPressed();
+            int key = GetCharPressed();
+            while (key > 0) {
+                // Only ascii!!
+                if ((key >= 32) && (key <= 125) &&
+                    (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                    st.textbox_text[st.text_cursor] = (char)key;
+                    st.textbox_text[++st.text_final_index] = '\0';
+                    st.text_cursor++;
                 }
+                key = GetCharPressed();
+            }
 
-                if (IsKeyPressed(KEY_BACKSPACE)) {
-                    if (st.text_cursor > 0) {
-                        st.text_cursor--;
-                        st.textbox_text[st.text_cursor] = '\0';
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
+                if (st.text_cursor > 0) {
+                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA; ++i) {
+                      st.textbox_text[i-1] = st.textbox_text[i];
                     }
+                    st.text_cursor--;
                 }
-            } else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            }
 
             if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
-                if (((st.frames_counter++ / 20) % 2) == 0)
-                    DrawText("_",
-                             textarea.x + 8 +
-                                 MeasureText(st.textbox_text, w.style.fontsize),
-                             textarea.y + 12, w.style.fontsize, MAROON);
+              char* nulltermed_text = malloc((st.text_cursor + 1)* sizeof(char));
+              for (int i = 0; i < st.text_cursor; ++i) {
+                nulltermed_text[i] = st.textbox_text[i];
+              }
+              nulltermed_text[st.text_cursor] = '\0';
+              if (((st.frames_counter++ / 20) % 2) == 0)
+                  DrawText("_",
+                           textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
+                           textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
+                           MAROON);
+
+              free(nulltermed_text);
             }
         }
-
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
@@ -161,7 +173,12 @@ int main(void) {
         } else st.curr_held = NULL;
 
         if (IsKeyPressed(KEY_F10)) st.textbox_up = !st.textbox_up;
-        
+        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor > 0)
+            st.text_cursor--;
+        else if (IsKeyPressed(KEY_RIGHT)
+                 && st.text_cursor < MAX_TEXT_IN_TEXTAREA
+                 && st.text_cursor < st.text_final_index)
+            st.text_cursor++;
     }
 
     CloseWindow(); // Close window and OpenGL context
