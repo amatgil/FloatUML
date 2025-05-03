@@ -9,7 +9,7 @@
 // Note that this is a vector of pointers
 struct Relacio {
     struct Classe** cs; 
-    Vector2* multiplicitats;
+    Vector2* multiplicitats; // -1 means asterisk
     uint32_t len;
     uint32_t capacity;
 };
@@ -19,7 +19,7 @@ struct Relacio umlr_init() {
     uint32_t default_capacity = 16;
     struct Relacio r = {
         .cs = malloc(default_capacity * sizeof(struct Classe*)),
-        .multiplicitats = malloc(default_capacity * sizeof(struct Classe*)),
+        .multiplicitats = malloc(default_capacity * sizeof(Vector2)),
         .len = 0,
         .capacity = default_capacity};
     return r;
@@ -28,16 +28,25 @@ struct Relacio umlr_init() {
 // modifies a, pushing b onto it
 // returns a pointer inside the vector
 struct Classe **umlr_append(struct Relacio *a,
-                                   struct Classe* b) {
+                            struct Classe* b,
+                            Vector2 multiplicitat) {
     uint32_t new_length = a->len + 1;
     if (a->capacity <= new_length) {
         a->capacity *= 2;
+
         struct Classe** new_cs =
             malloc(a->capacity * sizeof(struct Classe*));
         for (uint32_t i = 0; i < a->len; ++i)
             new_cs[i] = a->cs[i];
         free(a->cs);
         a->cs = new_cs;
+
+        struct Vector2* new_ms =
+            malloc(a->capacity * sizeof(Vector2));
+        for (uint32_t i = 0; i < a->len; ++i)
+            new_ms[i] = a->multiplicitats[i];
+        free(a->multiplicitats);
+        a->multiplicitats = new_ms;
     }
     a->cs[a->len] = b;
     a->len++;
