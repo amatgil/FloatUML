@@ -216,6 +216,14 @@ int main(void) {
                         st.curr_held = &w.classes.cs[i];
                     }
                 }
+                for (int i = 0; i < w.relacions.rs->len; ++i) {
+                    if (w.relacions.rs->associativa != NULL) {
+                        Rectangle rect = umld_rect_of(*w.relacions.rs->associativa, &w.style);
+                        if (CheckCollisionPointRec(mpos, rect)) {
+                            st.curr_held = &w.classes.cs[i];
+                        }
+                    }
+                }
             }
         } else
             st.curr_held = NULL;
