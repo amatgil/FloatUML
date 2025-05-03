@@ -72,9 +72,9 @@ int main(void) {
         .textbox_text = {[0 ... 1023] = ' '},
         .text_final_index = 0,
     };
-    Rectangle textarea = {screenWidth - (int)((float)screenWidth /
-                                              (float)PERCENTATGE_MIDA_TEXTBOX),
-                          0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
+    
+    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
                           screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
@@ -83,6 +83,7 @@ int main(void) {
 
     struct World w;
     startup_example(&w);
+    SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
     while (!WindowShouldClose())
     {
