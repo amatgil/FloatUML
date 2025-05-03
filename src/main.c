@@ -37,6 +37,8 @@ struct World startup_example() {
         umlc_append(&w.classes, create_class("Goodbye", 400, 400, NULL));
     struct Classe *c =
         umlc_append(&w.classes, create_class("Third option", 600, 350, NULL));
+    struct Classe *d =
+        umlc_append(&w.classes, create_class("NoAttrs", 200, 550, NULL));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
