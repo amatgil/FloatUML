@@ -2,6 +2,11 @@
 #include "raylib.h"
 #include "umlc.h"
 #include <stdint.h>
+#include "intersect.h"
+#include "umlr.h"
+
+#ifndef UTIL
+#define UTIL
 
 Vector2 rect_center(Rectangle rect) {
     return (Vector2){rect.x + rect.width / 2, rect.y + rect.height / 2};
@@ -26,3 +31,21 @@ Rectangle umld_rect_of(struct Classe c, struct Style *style) {
     }
     return (Rectangle){c.pos.x, c.pos.y, max, m_colon.y * (nattrs + 1) + marge};
 }
+
+Vector2 calcul_punt_mig (struct Relacio relacio, struct Style *style)
+{
+    Vector2 punt_mig = {0,0};
+    int lenght = relacio.len;
+    for (int i = 0; i < lenght; ++i)
+    {
+        Rectangle arect = umld_rect_of(*relacio.cs[i], style);
+        Vector2 pos = rect_center(arect);
+        punt_mig.x += pos.x;
+        punt_mig.y += pos.y;
+    }
+    punt_mig.x /= lenght;
+    punt_mig.y /= lenght;
+    return punt_mig;
+}
+
+#endif
