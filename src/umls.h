@@ -51,7 +51,6 @@ struct StrSlice umls_from(char *s) {
 void umls_print(struct StrSlice *s) {
     for (uint32_t i = 0; i < s->len; ++i)
         printf("%c", s->text[i]);
-    printf("\n");
 }
 
 #endif
