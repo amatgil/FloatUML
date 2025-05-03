@@ -1,5 +1,6 @@
 #ifndef UMLS_H
 #define UMLS_H
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +52,32 @@ struct StrSlice umls_from(char *s) {
 void umls_print(struct StrSlice *s) {
     for (uint32_t i = 0; i < s->len; ++i)
         printf("%c", s->text[i]);
+}
+
+int umls_cmp(struct StrSlice *a, struct StrSlice *b) {
+    if (a->len != b->len)
+        return 0;
+    for (int i = 0; i < a->len; i++) {
+        if (a->text[i] != b->text[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int umls_cmp_cstr(struct StrSlice *a, char *b) {
+    struct StrSlice aux = umls_from(b);
+    return umls_cmp(a, &aux);
+}
+
+// TODO
+struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
+    if (a->len < end - start) {
+        return umls_init();
+    }
+
+    struct StrSlice new = umls_init();
+    return new;
 }
 
 #endif

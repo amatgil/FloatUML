@@ -3,10 +3,8 @@
 #include "umls.h"
 #include <stdint.h>
 
-struct World {
-    // vector de Classe
-    // vector de RelacioBinaria
-};
+#ifndef DEFS
+#define DEFS
 
 struct Classe {
     struct StrSlice nom;
@@ -20,3 +18,5 @@ struct RelacioBinaria {
     int32_t mult_a[2]; // -1 vol dir *
     int32_t mult_b[2];
 };
+
+#endif
