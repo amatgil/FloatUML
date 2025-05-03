@@ -1,0 +1,7 @@
+all: test_umls test_umla
+test_umls: src/test_umls.c
+	gcc src/test_umls.c -I src/ -o tests/test_umls
+	./tests/test_umls
+test_umla: src/test_umla.c
+	gcc src/test_umla.c -I src/ -o tests/test_umla
+	./tests/test_umla
