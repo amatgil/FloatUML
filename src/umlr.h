@@ -12,6 +12,7 @@ struct Relacio {
     Vector2* multiplicitats; // -1 means asterisk
     uint32_t len;
     uint32_t capacity;
+    struct Classe* associativa;
 };
 
 // Returns empty
@@ -21,7 +22,8 @@ struct Relacio umlr_init() {
         .cs = malloc(default_capacity * sizeof(struct Classe*)),
         .multiplicitats = malloc(default_capacity * sizeof(Vector2)),
         .len = 0,
-        .capacity = default_capacity};
+        .capacity = default_capacity,
+        .associativa = NULL};
     return r;
 }
 
@@ -58,6 +60,11 @@ struct Classe **umlr_append(struct Relacio *a,
 
     return &a->cs[a->len-1];
 }
+
+void umlr_set_associativa(struct Relacio r, struct Classe *c) {
+    r.associativa = c;
+}
+
 struct Relacions {
     struct Relacio *rs;
     uint32_t len;
