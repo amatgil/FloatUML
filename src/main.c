@@ -1,5 +1,6 @@
 #include "defs.h"
 #include "intersect.h"
+#include "parser.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "umla.h"
@@ -7,6 +8,7 @@
 #include "umld_class.h"
 #include "umld_rel.h"
 #include "umlr.h"
+#include "umls.h"
 #include "utils.h"
 
 typedef int32_t Bool;
@@ -62,7 +64,7 @@ struct World startup_example() {
 
 int main(void) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE); 
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     int screenWidth = 1000;
     int screenHeight = 700;
     float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
@@ -73,27 +75,26 @@ int main(void) {
         .curr_held = NULL,
         .textbox_up = true,
         .text_cursor = 0,
-        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA-1] = ' '},
+        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA - 1] = ' '},
         .text_final_index = 0,
     };
-    
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
     SetTargetFPS(60);
 
-    struct World w = startup_example();
+    struct World w = umlw_init("external/Consolas/consolas.ttf", 22);
     SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
     uint32_t cellSize = 32;
 
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         int new_height = GetScreenHeight();
         int new_width = GetScreenWidth();
 
         width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
-        textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea, screenHeight};
+        textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea,
+                               screenHeight};
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -108,8 +109,10 @@ int main(void) {
         }
 
         for (int i = 0; i < w.classes.len; ++i) {
-            w.classes.cs[i].pos.x = w.classes.cs[i].pos.x * new_width / screenWidth;
-            w.classes.cs[i].pos.y = w.classes.cs[i].pos.y * new_height / screenHeight;
+            w.classes.cs[i].pos.x =
+                w.classes.cs[i].pos.x * new_width / screenWidth;
+            w.classes.cs[i].pos.y =
+                w.classes.cs[i].pos.y * new_height / screenHeight;
             umld_class(w.classes.cs[i], &w.style);
         }
 
@@ -117,20 +120,20 @@ int main(void) {
             draw_relation(w.relacions.rs[i], &w.style);
 
         if (st.textbox_up) {
-            Bool mouseOnText;
-            if (CheckCollisionPointRec(GetMousePosition(), textarea)) mouseOnText = true;
-            else mouseOnText = false;
 
             DrawRectangleRec(textarea, BLACK);
-            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
-                     w.style.fontsize, TEXT_COLOR);
+            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD,
+                     (int)textarea.y + TEXTBOX_VERTPAD, w.style.fontsize,
+                     TEXT_COLOR);
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
+            int update = 0;
             int key = GetCharPressed();
             while (key > 0) {
                 // Only ascii!!
                 if ((key >= 32) && (key <= 125) &&
                     (st.text_cursor < MAX_TEXT_IN_TEXTAREA)) {
+                    update = 1;
                     st.textbox_text[st.text_cursor] = (char)key;
                     st.textbox_text[++st.text_final_index] = '\0';
                     st.text_cursor++;
@@ -138,32 +141,53 @@ int main(void) {
                 key = GetCharPressed();
             }
 
-            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
+            if (IsKeyPressed(KEY_BACKSPACE) ||
+                IsKeyPressedRepeat(KEY_BACKSPACE)) {
                 if (st.text_cursor > 0) {
-                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA; ++i) {
-                      st.textbox_text[i-1] = st.textbox_text[i];
+                    for (int i = st.text_cursor; i < MAX_TEXT_IN_TEXTAREA;
+                         ++i) {
+                        st.textbox_text[i - 1] = st.textbox_text[i];
                     }
                     st.text_cursor--;
                 }
             }
 
-            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
-              char* nulltermed_text = malloc((st.text_cursor + 1)* sizeof(char));
-              for (int i = 0; i < st.text_cursor; ++i) {
-                nulltermed_text[i] = st.textbox_text[i];
-              }
-              nulltermed_text[st.text_cursor] = '\0';
-              if (((st.frames_counter++ / 20) % 2) == 0)
-                  DrawText("_",
-                           textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
-                           textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
-                           TEXT_COLOR);
+            if (update) {
+                printf("Text to parse: %s \n", st.textbox_text);
+                struct StrSlice texttoparse = umls_from(st.textbox_text);
+                parse(&texttoparse, &w);
+                for (int i = 0; i < w.classes.len; i++) {
+                    printf("Class: %s\n", w.classes.cs[i].nom);
+                    for (int j = 0; j < w.classes.cs[i].attribs.len; j++) {
+                        printf("\tAttrib: %s : %s\n",
+                               w.classes.cs[i].attribs.attrs[j].nom.text,
+                               w.classes.cs[i].attribs.attrs[j].tipus.text);
+                    }
+                }
+            }
 
-              free(nulltermed_text);
+            if (st.text_cursor < MAX_TEXT_IN_TEXTAREA) {
+                char *nulltermed_text =
+                    malloc((st.text_cursor + 1) * sizeof(char));
+                for (int i = 0; i < st.text_cursor; ++i) {
+                    nulltermed_text[i] = st.textbox_text[i];
+                }
+                nulltermed_text[st.text_cursor] = '\0';
+                if (((st.frames_counter++ / 20) % 2) == 0)
+                    DrawText("_",
+                             textarea.x + TEXTBOX_LEFTPAD +
+                                 MeasureText(nulltermed_text, w.style.fontsize),
+                             textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
+                             TEXT_COLOR);
+
+                free(nulltermed_text);
             }
         } else {
-          char* text = "F10 to toggle terminal";
-          DrawText(text, screenWidth - MeasureText(text, w.style.fontsize) - TEXTBOX_LEFTPAD, screenHeight - w.style.fontsize, w.style.fontsize, BLACK);
+            char *text = "F10 to toggle terminal";
+            DrawText(text,
+                     screenWidth - MeasureText(text, w.style.fontsize) -
+                         TEXTBOX_LEFTPAD,
+                     screenHeight - w.style.fontsize, w.style.fontsize, BLACK);
         }
 
         EndDrawing();
@@ -181,14 +205,16 @@ int main(void) {
                     }
                 }
             }
-        } else st.curr_held = NULL;
+        } else
+            st.curr_held = NULL;
 
-        if (IsKeyPressed(KEY_F10)) st.textbox_up = !st.textbox_up;
+        if (IsKeyPressed(KEY_F10))
+            st.textbox_up = !st.textbox_up;
         else if (IsKeyPressed(KEY_LEFT) && st.text_cursor > 0)
             st.text_cursor--;
-        else if (IsKeyPressed(KEY_RIGHT)
-                 && st.text_cursor < MAX_TEXT_IN_TEXTAREA
-                 && st.text_cursor < st.text_final_index)
+        else if (IsKeyPressed(KEY_RIGHT) &&
+                 st.text_cursor < MAX_TEXT_IN_TEXTAREA &&
+                 st.text_cursor < st.text_final_index)
             st.text_cursor++;
 
         screenHeight = new_height;
