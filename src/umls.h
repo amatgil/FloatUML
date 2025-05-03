@@ -33,12 +33,10 @@ void umls_resize(struct StrSlice *a, int n) {
         while (a->capacity <= n)
             a->capacity *= 2;
         char *new_text = malloc(a->capacity);
-        strncpy(new_text, a->text, a->len);
+        memcpy(new_text, a->text, a->len);
         free(a->text);
         a->text = new_text;
     }
-    a->len = n;
-    a->text[a->len] = 0;
 }
 
 // modifies a, pushing b onto it
@@ -46,7 +44,9 @@ void umls_append(struct StrSlice *a, char *b) {
     uint32_t push_length = strlen(b);
     uint32_t new_length = a->len + push_length;
     umls_resize(a, new_length);
-    strcat(a->text, b);
+    memcpy(a->text + a->len, b, push_length);
+    a->len += push_length;
+    a->text[a->len] = '\0';
 }
 
 // Assumes 's' is null terminated
@@ -58,12 +58,10 @@ struct StrSlice umls_from(char *s) {
 
 int umls_cmp(struct StrSlice *a, struct StrSlice *b) {
     if (a->len != b->len) {
-        printf("Equal false because of diferent length\n");
         return 0;
     }
     for (int i = 0; i < a->len; i++) {
         if (a->text[i] != b->text[i]) {
-            printf("Character unequal: %d\n", (char)a->text[i]);
             return 0;
         }
     }
@@ -96,22 +94,31 @@ struct StrSliceStream umlss_init(struct StrSlice *str) {
 struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
     if (a->len < end || start > end) {
         printf("Error! in the substring indexes!\n");
+        // AQUI VA UN RETURN O ALGO
     }
     struct StrSlice new = umls_init();
     umls_resize(&new, end - start + 1);
 
-    strncpy(new.text, &a->text[start], end - start + 1);
+    memcpy(new.text, &a->text[start], end - start + 1);
+    new.len = end - start + 1;
+    new.text[new.len] = '\0';
 
     return new;
 }
 
+int is_spacechar(char c) { return c == ' ' || c == '\n' || c == '\t'; }
+
+int is_eof(struct StrSlice a) { return a.text[0] == 0; }
+
 struct StrSlice umlss_readw(struct StrSliceStream *stream) {
     char c;
-    while ((c = umlss_read(stream)) == ' ') {
+    c = umlss_read(stream);
+    while (is_spacechar(c)) {
+        c = umlss_read(stream);
     }
 
     int start = stream->ptr - 1;
-    while (c != ' ' && c != 0) {
+    while (!is_spacechar(c) && c != 0) {
         c = umlss_read(stream);
     }
 

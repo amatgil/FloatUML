@@ -12,8 +12,10 @@ void umld_class(struct Classe c, struct Style *style) {
    
     Vector2 m_colon = MeasureTextEx(style->font, " : ", style->fontsize, 0);
     uint32_t marge = (m_colon.y/3);
-    Vector2 size_rect = {m_colon.x*1.33, (nattrs + 1) * m_colon.y + marge};
-    
+    Vector2 size_rect = {
+        MeasureTextEx(style->font, c.nom, style->fontsize, 0).x,
+        (nattrs + 1) * m_colon.y + marge};
+
     for (uint32_t i = 0; i < nattrs; ++i) {
         Vector2 m_nom = MeasureTextEx(style->font, c.attribs.attrs[i].nom.text,
             style->fontsize, 0);

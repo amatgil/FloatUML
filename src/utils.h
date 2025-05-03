@@ -13,7 +13,7 @@ Vector2 rect_center(Rectangle rect) {
 }
 
 Rectangle umld_rect_of(struct Classe c, struct Style *style) {
-    uint32_t max = 0;
+    uint32_t max = MeasureTextEx(style->font, c.nom, style->fontsize, 0).x;
     uint32_t nattrs = c.attribs.len;
     Vector2 m_colon = MeasureTextEx(style->font, " : ", style->fontsize, 0);
     uint32_t marge = (m_colon.y/3);
