@@ -220,7 +220,7 @@ int main(void) {
                     if (w.relacions.rs->associativa != NULL) {
                         Rectangle rect = umld_rect_of(*w.relacions.rs->associativa, &w.style);
                         if (CheckCollisionPointRec(mpos, rect)) {
-                            st.curr_held = &w.classes.cs[i];
+                            st.curr_held = w.relacions.rs->associativa;
                         }
                     }
                 }
