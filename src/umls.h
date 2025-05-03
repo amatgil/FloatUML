@@ -1,6 +1,7 @@
 #ifndef UMLS_H
 #define UMLS_H
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,15 +68,46 @@ int umls_cmp_cstr(struct StrSlice *a, char *b) {
     return umls_cmp(a, &aux);
 }
 
-// TODO
+struct StrSliceStream {
+    struct StrSlice str;
+    int ptr;
+};
+
+char umlss_read(struct StrSliceStream *stream) {
+    return stream->str.text[stream->ptr++];
+}
+
+struct StrSliceStream umlss_init(struct StrSlice *str) {
+    struct StrSliceStream a;
+    a.str = umls_from(str->text);
+    a.ptr = 0;
+    return a;
+}
+
 struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
-    if (a->len < end - start) {
+    if (a->len < end - start + 1) {
         return umls_init();
     }
-
     struct StrSlice new = umls_init();
+    umls_resize(a, end - start + 1);
+
+    strncpy(new.text, &a->text[start], end - start + 1);
 
     return new;
+}
+
+struct StrSlice umlss_readw(struct StrSliceStream *stream) {
+    char c;
+    while ((c = umlss_read(stream)) == ' ') {
+    }
+
+    int start = stream->ptr;
+    while ((c = umlss_read(stream)) != 0) {
+    }
+
+    int end = stream->ptr;
+
+    return umls_substr(&stream->str, start, end - 1);
 }
 
 #endif

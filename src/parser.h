@@ -1,3 +1,4 @@
 #include "defs.h"
+#include "umls.h"
 
-struct Classe parse_classe(const char *a) {}
+struct Classe parse(struct StrSlice *a) {}

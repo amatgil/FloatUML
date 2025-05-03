@@ -11,22 +11,22 @@ Rectangle umld_class(struct Classe c, struct Style *style) {
 
     for (uint32_t i = 0; i < nattrs; ++i) {
 
-        Vector2 m_nom = MeasureTextEx(style->font, c.attribs.attrs[i].nom,
+        Vector2 m_nom = MeasureTextEx(style->font, c.attribs.attrs[i].nom.text,
                                       style->fontsize, 0);
         Vector2 m_typ = MeasureTextEx(
-            style->font, c.attribs.attrs[i].tipus, style->fontsize, 0);
+            style->font, c.attribs.attrs[i].tipus.text, style->fontsize, 0);
 
         Vector2 pos = {c.pos.x, c.pos.y + i * m_nom.y + m_nom.y};
 
         if (m_nom.x + m_typ.x + m_colon.x > max)
             max = m_nom.x + m_typ.x + m_colon.x;
-        DrawTextEx(style->font, c.attribs.attrs[i].nom, pos,
+        DrawTextEx(style->font, c.attribs.attrs[i].nom.text, pos,
                    style->fontsize, 0, BLACK);
         pos.x += m_nom.x;
         DrawTextEx(style->font, " : ", pos, style->fontsize, 0, BLACK);
 
         pos.x += m_colon.x;
-        DrawTextEx(style->font, c.attribs.attrs[i].tipus, pos,
+        DrawTextEx(style->font, c.attribs.attrs[i].tipus.text, pos,
                    style->fontsize, 0, BLACK);
     }
 

@@ -8,5 +8,9 @@ int main(int argc, char *argv[]) {
     printf(a.text);
     printf("\n");
 
+    struct StrSliceStream b = umlss_init(&a);
+
+    printf(umlss_readw(&b).text);
+
     return EXIT_SUCCESS;
 }
