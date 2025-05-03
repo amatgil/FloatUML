@@ -62,8 +62,16 @@ struct World startup_example() {
 
 int main(void) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    const int screenWidth = 1000;
-    const int screenHeight = 1000;
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE); 
+
+    const int true_screen_width = 1000;
+    const int true_screen_height = 1000;
+
+    int screenWidth = 1000;
+    int screenHeight = 1000;
+    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
+                          screenHeight};
 
     struct State st = {
         .curr_held = NULL,
@@ -73,9 +81,6 @@ int main(void) {
         .text_final_index = 0,
     };
     
-    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
-    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
-                          screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
@@ -88,6 +93,11 @@ int main(void) {
 
     while (!WindowShouldClose())
     {
+        screenHeight = GetScreenHeight();
+        screenWidth = GetScreenWidth();
+        width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+        textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea, screenHeight};
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -151,7 +161,11 @@ int main(void) {
 
               free(nulltermed_text);
             }
+        } else {
+          char* text = "F10 to toggle terminal";
+          DrawText(text, screenWidth - MeasureText(text, w.style.fontsize) - TEXTBOX_LEFTPAD, screenHeight - w.style.fontsize, w.style.fontsize, BLACK);
         }
+
         EndDrawing();
 
         if (IsMouseButtonDown(0)) {
