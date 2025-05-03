@@ -2,7 +2,7 @@
 #include "raylib.h"
 #include "umla.h"
 
-void draw_relation(struct RelacioBinaria r, uint32_t mida) {
+void draw_relation(struct RelacioBinaria r, Rectangle rec1, Rectangle rec2) {
     uint32_t h_a = (r.a->attribs.len + 1) * mida + 3;
     uint32_t h_b = (r.b->attribs.len + 1) * mida + 3;
     uint32_t w_a = 0, w_b = 0;
