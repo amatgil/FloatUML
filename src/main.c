@@ -54,7 +54,6 @@ int main(void) {
     struct Relacio r2 = umlr_init();
     umlr_append(&r2, b);
     umlr_append(&r2, c);
-    umlr_append(&r2, a);
     umlrs_append(&relacions, r2);
 
 
