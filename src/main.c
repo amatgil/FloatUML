@@ -15,6 +15,7 @@ typedef int32_t Bool;
 #define PERCENTATGE_MIDA_TEXTBOX 3 // width/PERCENTATGE_MIDA_TEXTBOX
 #define TEXTBOX_LEFTPAD 8
 #define TEXTBOX_VERTPAD 5
+#define TEXT_COLOR RAYWHITE
 
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
@@ -71,12 +72,12 @@ int main(void) {
         .curr_held = NULL,
         .textbox_up = true,
         .text_cursor = 0,
-        .textbox_text = {[0 ... 1023] = ' '},
+        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA-1] = ' '},
         .text_final_index = 0,
     };
-    Rectangle textarea = {screenWidth - (int)((float)screenWidth /
-                                              (float)PERCENTATGE_MIDA_TEXTBOX),
-                          0, screenWidth / PERCENTATGE_MIDA_TEXTBOX,
+    
+    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
                           screenHeight};
 
     InitWindow(screenWidth, screenHeight, "floatUML");
@@ -85,11 +86,23 @@ int main(void) {
 
     struct World w;
     startup_example(&w);
+    SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
+
+    uint32_t cellSize = 32;
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
+        for (int x = 0; x <= screenWidth; x += cellSize) {
+            DrawLine(x, 0, x, screenHeight, LIGHTGRAY);
+        }
+
+        // Dibujar líneas horizontales
+        for (int y = 0; y <= screenHeight; y += cellSize) {
+            DrawLine(0, y, screenWidth, y, LIGHTGRAY);
+        }
 
         for (int i = 0; i < w.classes.len; ++i)
             umld_class(w.classes.cs[i], &w.style);
@@ -104,7 +117,7 @@ int main(void) {
 
             DrawRectangleRec(textarea, BLACK);
             DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD, (int)textarea.y + TEXTBOX_VERTPAD,
-                     w.style.fontsize, MAROON);
+                     w.style.fontsize, TEXT_COLOR);
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
             int key = GetCharPressed();
@@ -138,7 +151,7 @@ int main(void) {
                   DrawText("_",
                            textarea.x + TEXTBOX_LEFTPAD + MeasureText(nulltermed_text, w.style.fontsize),
                            textarea.y + TEXTBOX_VERTPAD + 4, w.style.fontsize,
-                           MAROON);
+                           TEXT_COLOR);
 
               free(nulltermed_text);
             }
