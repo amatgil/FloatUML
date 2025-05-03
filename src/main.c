@@ -13,13 +13,13 @@ struct HeldState {
   struct Classe* curr; // NULL if nothing is held
 };
 
-void startup_example(struct Classes* classes, struct Relacions* relacions, struct Style* style) {
-    style.font = LoadFont("external/Consolas/consolas.ttf");
-    style.fontsize = 32;
+void startup_example(struct World* w) {
+    w->style.font = LoadFont("external/Consolas/consolas.ttf");
+    w->style.fontsize = 32;
 
-    struct Classe* a = umlc_append(classes, create_class("Hello", 200, 200, NULL));
-    struct Classe* b = umlc_append(classes, create_class("Goodbye", 400, 400, NULL));
-    struct Classe* c = umlc_append(classes, create_class("Third option", 600, 350, NULL));
+    struct Classe* a = umlc_append(&w->classes, create_class("Hello", 200, 200, NULL));
+    struct Classe* b = umlc_append(&w->classes, create_class("Goodbye", 400, 400, NULL));
+    struct Classe* c = umlc_append(&w->classes, create_class("Third option", 600, 350, NULL));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
@@ -35,12 +35,12 @@ void startup_example(struct Classes* classes, struct Relacions* relacions, struc
     struct Relacio r1 = umlr_init();
     umlr_append(&r1, a);
     umlr_append(&r1, b);
-    umlrs_append(relacions, r1);
+    umlrs_append(&w->relacions, r1);
 
     struct Relacio r2 = umlr_init();
     umlr_append(&r2, b);
     umlr_append(&r2, c);
-    umlrs_append(relacions, r2);
+    umlrs_append(&w->relacions, r2);
 }
 
 int main(void) {
@@ -54,10 +54,8 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    struct Style style;
-    struct Classes classes = umlc_init();
-    struct Relacions relacions = umlrs_init();
-    startup_example(&classes, &relacions, &style);
+    struct World w;
+    startup_example(&w);
 
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -65,15 +63,15 @@ int main(void) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        for (int i = 0; i < classes.len; ++i) umld_class(classes.cs[i], &style);
+        for (int i = 0; i < w.classes.len; ++i) umld_class(w.classes.cs[i], &w.style);
 
-        for (int i = 0; i < relacions.len; ++i) {
-          struct Relacio r = relacions.rs[i];
+        for (int i = 0; i < w.relacions.len; ++i) {
+          struct Relacio r = w.relacions.rs[i];
           if (r.len == 2) {
               struct Classe *a = r.cs[0];
               struct Classe *b = r.cs[1];
-              Rectangle arect = umld_rect_of(*a, &style);
-              Rectangle brect = umld_rect_of(*b, &style);
+              Rectangle arect = umld_rect_of(*a, &w.style);
+              Rectangle brect = umld_rect_of(*b, &w.style);
               Vector2 pt1 =
                   int_seg_rect(rect_center(arect), rect_center(brect), arect);
 
@@ -92,10 +90,10 @@ int main(void) {
                 held_state.curr->pos = Vector2Add(held_state.curr->pos, GetMouseDelta());
             } else {
                 Vector2 mpos = GetMousePosition();
-                for (int i = 0; i < classes.len; ++i) {
-                  Rectangle rect = umld_rect_of(classes.cs[i], &style);
+                for (int i = 0; i < w.classes.len; ++i) {
+                  Rectangle rect = umld_rect_of(w.classes.cs[i], &w.style);
                     if (CheckCollisionPointRec(mpos, rect)) {
-                        held_state.curr = &classes.cs[i];
+                        held_state.curr = &w.classes.cs[i];
                     }
                 }
             }
