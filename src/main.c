@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "textarea.h"
 #include "umla.h"
 #include "umlc.h"
 #include "umld_class.h"
@@ -75,6 +76,8 @@ int main(void) {
     Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
                           screenHeight};
 
+    TextArea tarea = create_text_area(textarea);
+
     struct State st = {
         .curr_held = NULL,
         .textbox_up = false,
@@ -101,6 +104,8 @@ int main(void) {
         textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea,
                                screenHeight};
 
+        uml_text_area_pull_events(&tarea);
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -111,6 +116,12 @@ int main(void) {
         // Dibujar líneas horizontales
         for (int y = 0; y <= screenHeight; y += cellSize) {
             DrawLine(0, y, screenWidth, y, LIGHTGRAY);
+        }
+
+        for (int i = 0; i < w.classes.len; ++i) {
+            if (w.classes.cs[i].superclasse != NULL)
+                draw_subclass_relation(*w.classes.cs[i].superclasse,
+                                       w.classes.cs[i], &w.style);
         }
 
         for (int i = 0; i < w.classes.len; ++i) {
@@ -125,75 +136,26 @@ int main(void) {
             draw_relation(w.relacions.rs[i], &w.style);
 
         if (st.textbox_up) {
-
-            DrawRectangleRec(textarea, BLACK);
-            DrawText(st.textbox_text, (int)textarea.x + TEXTBOX_LEFTPAD,
-                     (int)textarea.y + TEXTBOX_VERTPAD, w.style.fontsize,
-                     TEXT_COLOR);
-            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            umld_text_area(&tarea, &w);
 
             int update = 0;
-            int key = GetCharPressed();
-            while (key > 0) {
-                // Only ascii!!
-                if ((key >= 32) && (key <= 125) &&
-                    (st.text_cursor_col < MAX_TEXT_IN_TEXTAREA)) {
-                    update = 1;
-                    st.textbox_text[st.text_cursor_col] = (char)key;
-                    st.textbox_text[++st.text_final_index] = '\0';
-                    st.text_cursor_col++;
-                }
-                key = GetCharPressed();
-            }
 
-            if (IsKeyPressed(KEY_ENTER)) {
-                update = 1;
-                st.textbox_text[st.text_cursor_col] = (char)'\n';
-                st.textbox_text[++st.text_final_index] = '\0';
-                st.text_cursor_col++;
-              }
-            if (IsKeyPressed(KEY_BACKSPACE) ||
-                IsKeyPressedRepeat(KEY_BACKSPACE)) {
-                if (st.text_cursor_col > 0) {
-                    for (int i = st.text_cursor_col; i < MAX_TEXT_IN_TEXTAREA;
-                         ++i) {
-                        st.textbox_text[i - 1] = st.textbox_text[i];
-                    }
-                    st.text_cursor_col--;
-                }
-            }
+            /* if (update) { */
+            /*     printf("Text to parse: %s \n", st.textbox_text); */
+            /*     struct StrSlice texttoparse = umls_from(st.textbox_text); */
+            /*     parse(&texttoparse, &w); */
+            /*     for (int i = 0; i < w.classes.len; i++) { */
+            /*         printf("Class: %s\n", w.classes.cs[i].nom); */
+            /*         for (int j = 0; j < w.classes.cs[i].attribs.len; j++) {
+             */
+            /*             printf("\tAttrib: %s : %s\n", */
+            /*                    w.classes.cs[i].attribs.attrs[j].nom.text, */
+            /*                    w.classes.cs[i].attribs.attrs[j].tipus.text);
+             */
+            /*         } */
+            /*     } */
+            /* } */
 
-            if (update) {
-                printf("Text to parse: %s \n", st.textbox_text);
-                struct StrSlice texttoparse = umls_from(st.textbox_text);
-                parse(&texttoparse, &w);
-                for (int i = 0; i < w.classes.len; i++) {
-                    printf("Class: %s\n", w.classes.cs[i].nom);
-                    for (int j = 0; j < w.classes.cs[i].attribs.len; j++) {
-                        printf("\tAttrib: %s : %s\n",
-                               w.classes.cs[i].attribs.attrs[j].nom.text,
-                               w.classes.cs[i].attribs.attrs[j].tipus.text);
-                    }
-                }
-            }
-
-            if (st.text_cursor_col < MAX_TEXT_IN_TEXTAREA) {
-                char *nulltermed_text = malloc((st.text_cursor_col + 1) * sizeof(char));
-                for (int i = 0; i < st.text_cursor_col; ++i) {
-                    nulltermed_text[i] = st.textbox_text[i];
-                }
-                nulltermed_text[st.text_cursor_col] = '\0';
-                Vector2 textsize = MeasureTextEx(w.style.font, nulltermed_text, w.style.fontsize, 0.0);
-                if (((st.frames_counter++ / 20) % 2) == 0) {
-                    DrawText("_",
-                             textarea.x + TEXTBOX_LEFTPAD + textsize.x,
-                             textarea.y + 2*TEXTBOX_VERTPAD + textsize.y - w.style.fontsize,
-                             w.style.fontsize,
-                             TEXT_COLOR);
-                }
-
-                free(nulltermed_text);
-            }
         } else {
             char *text = "F10 to toggle terminal";
             DrawText(text,
@@ -218,7 +180,8 @@ int main(void) {
                 }
                 for (int i = 0; i < w.relacions.rs->len; ++i) {
                     if (w.relacions.rs->associativa != NULL) {
-                        Rectangle rect = umld_rect_of(*w.relacions.rs->associativa, &w.style);
+                        Rectangle rect = umld_rect_of(
+                            *w.relacions.rs->associativa, &w.style);
                         if (CheckCollisionPointRec(mpos, rect)) {
                             st.curr_held = w.relacions.rs->associativa;
                         }
