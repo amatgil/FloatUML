@@ -28,7 +28,7 @@ void parse(struct StrSlice *a, struct World *w) {
             struct StrSlice bracket = umlss_readw(&b);
             if (!umls_cmp_cstr(&bracket, "{")) {
                 printf("Error de compilació near");
-                printf(name.text);
+                printf("%s", name.text);
                 printf("\n");
                 printf("Unexpedted: %s", bracket.text);
                 printf("\n");
@@ -40,7 +40,7 @@ void parse(struct StrSlice *a, struct World *w) {
                 struct StrSlice colon = umlss_readw(&b);
                 if (!umls_cmp_cstr(&colon, ":")) {
                     printf("Error de compilació near");
-                    printf(attribname.text);
+                    printf("%s", attribname.text);
                     printf("\n");
                     printf("Unexpedted: %s", colon.text);
                     printf("\n");

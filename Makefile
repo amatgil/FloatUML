@@ -1,5 +1,5 @@
 RAYLIB ?= ./external/raylib-5.5/src/
-CFLAGS = -m64 -std=c99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual -fsanitize=address -fno-omit-frame-pointer
+CFLAGS = -m64 -std=c99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual -fno-omit-frame-pointer
 
 
 desktop:
