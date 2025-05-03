@@ -23,9 +23,54 @@ void draw_relation(struct Relacio relacio, struct Style *style) {
         DrawTextEx(style->font, buff, pt1, 12, 0, BLACK);
     }
 
-
-    
     if (relacio.associativa != NULL) {
         umld_assoc(relacio.associativa, punt_mig, style);
     }
+}
+
+void draw_y (Vector2 center_father, Vector2 center_son, Rectangle arect, Rectangle brect)
+{
+    DrawLineEx(center_father, (Vector2) {center_father.x, (center_father.y+center_son.y)/2}, 3, BLACK);
+    DrawLineEx((Vector2) {center_father.x, (center_father.y+center_son.y)/2}, (Vector2) {center_son.x, (center_father.y+center_son.y)/2}, 3, BLACK);
+    DrawLineEx(center_son, (Vector2) {center_son.x, (center_father.y+center_son.y)/2}, 3, BLACK);
+    Vector2 punt = {center_father.x, (center_father.y+center_son.y)/2};
+    Vector2 inter =
+                int_seg_rect (center_father, punt, arect);
+    int constant;
+    if (inter.y < center_son.y) constant = 80;
+    else constant = -80;
+    Vector2 t1 = {inter.x+10, inter.y+constant};
+    Vector2 t2 = {inter.x-10, inter.y+constant};
+    DrawTriangle(inter, t1, t2, RED);
+}
+
+void draw_x (Vector2 center_father, Vector2 center_son, Rectangle arect, Rectangle brect)
+{
+    DrawLineEx(center_father, (Vector2) {(center_father.x+center_son.x)/2, center_father.y}, 3, BLACK);
+    DrawLineEx((Vector2) {(center_father.x+center_son.x)/2, center_father.y}, (Vector2) {(center_father.x+center_son.x)/2, center_son.y}, 3, BLACK);
+    DrawLineEx(center_son, (Vector2) {(center_father.x+center_son.x)/2, center_son.y}, 3, BLACK);
+    Vector2 inter =
+                int_seg_rect (center_father, (Vector2) {center_father.x, (center_father.y+center_son.y)/2}, arect);
+    int constant;
+    if (inter.x < center_father.x) constant = -10;
+    else constant = 10;
+    Vector2 t1 = {inter.x+constant, inter.y+10};
+    Vector2 t2 = {inter.x+constant, inter.y-10};
+    DrawTriangle(inter, t1, t2, RED);
+}
+
+void draw_subclass_relation(struct Classe father, struct Classe son, struct Style *style)
+{
+    Rectangle arect = umld_rect_of(father, style);
+    Rectangle brect = umld_rect_of(son, style);
+    Vector2 center_father = rect_center(arect);
+    Vector2 center_son = rect_center(brect);
+    Vector2 pt1 =
+              int_seg_rect(center_father, center_son, arect);
+    Vector2 pt2 =
+              int_seg_rect(center_father, center_son, brect);
+    if (pt1.x == pt2.x || pt1.y == pt2.y) DrawLineEx(pt1, pt2, 3, BLACK);
+    else if (pt1.y < pt2.y) draw_y (center_father, center_son, arect, brect);
+    else if (abs(pt1.x-pt2.x) > pt1.y-pt2.y) draw_x (center_father, center_son, arect, brect);
+    else draw_y (center_father, center_son, arect, brect);
 }
