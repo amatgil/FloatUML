@@ -85,10 +85,21 @@ int main(void) {
     startup_example(&w);
     SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
+    uint32_t cellSize = 32;
+
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
+        for (int x = 0; x <= screenWidth; x += cellSize) {
+            DrawLine(x, 0, x, screenHeight, LIGHTGRAY);
+        }
+
+        // Dibujar líneas horizontales
+        for (int y = 0; y <= screenHeight; y += cellSize) {
+            DrawLine(0, y, screenWidth, y, LIGHTGRAY);
+        }
 
         for (int i = 0; i < w.classes.len; ++i)
             umld_class(w.classes.cs[i], &w.style);
