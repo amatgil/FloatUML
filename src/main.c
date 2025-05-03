@@ -22,7 +22,7 @@ int main(void) {
 
     InitWindow(screenWidth, screenHeight, "floatUML");
 
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);
 
     struct Style style;
     style.font = LoadFont("external/Consolas/consolas.ttf");
@@ -59,9 +59,7 @@ int main(void) {
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-
         BeginDrawing();
-
         ClearBackground(RAYWHITE);
 
         for (int i = 0; i < classes.len; ++i) umld_class(classes.cs[i], &style);
@@ -86,13 +84,12 @@ int main(void) {
 
         EndDrawing();
 
-        Vector2 mpos = GetMousePosition();
-
         if (IsMouseButtonDown(0)) {
             if (held_state.curr) {
                 held_state.curr->pos = Vector2Add(held_state.curr->pos, GetMouseDelta());
             } else {
                 // Nothing is currently held
+                Vector2 mpos = GetMousePosition();
                 for (int i = 0; i < classes.len; ++i) {
                   Rectangle rect = umld_rect_of(classes.cs[i], &style);
                     if (CheckCollisionPointRec(mpos, rect)) {
