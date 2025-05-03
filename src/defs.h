@@ -12,14 +12,14 @@ struct Style {
 };
 
 struct Classe {
-    struct StrSlice nom;
+    char* nom; // Null terminated
     struct Attributes attribs;
     Vector2 pos;
 };
 
 struct Classe create_class(char *nom, int32_t posx, int32_t posy) {
     struct Classe a;
-    a.nom = umls_from(nom);
+    a.nom = nom;
     a.attribs = umla_init();
     a.pos.x = posx;
     a.pos.y = posy;

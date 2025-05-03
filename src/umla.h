@@ -7,8 +7,8 @@
 /* ========== Pseudonamespace: umla ========== */
 
 struct Attribute {
-    struct StrSlice nom;
-    struct StrSlice tipus;
+    char* nom; // null terminated
+    char* tipus; // null terminated
     int32_t multmin;
     int32_t multmax;
 };
@@ -22,8 +22,8 @@ struct Attributes {
 struct Attribute create_attribute(char *nom, char *tipus, int32_t multmin,
                                   int32_t multmax) {
     struct Attribute a;
-    a.nom = umls_from(nom);
-    a.tipus = umls_from(tipus);
+    a.nom = nom;
+    a.tipus = tipus;
     a.multmin = multmin;
     a.multmax = multmax;
 
@@ -60,9 +60,9 @@ void umla_print(struct Attributes *as) {
     printf("Attributes:\n");
     for (uint32_t i = 0; i < as->len; ++i) {
         printf("\t");
-        printf(as->attrs[i].nom.text);
+        printf("%s", as->attrs[i].nom);
         printf(": ");
-        printf(as->attrs[i].tipus.text);
+        printf("%s", as->attrs[i].tipus);
         printf(" (%d..%d)\n", as->attrs[i].multmin, as->attrs[i].multmax);
     }
 }
