@@ -22,6 +22,8 @@ let
     emscripten # web support
 
     clang-tools
+    valgrind
+    gdb
   ];
 in
 pkgs.mkShell {
