@@ -10,6 +10,10 @@ int main(int argc, char *argv[]) {
 
     struct StrSliceStream b = umlss_init(&a);
 
+    printf("%c", umlss_read(&b));
+
+    printf(umlss_readw(&b).text);
+    printf("\n");
     printf(umlss_readw(&b).text);
     printf("\n");
 

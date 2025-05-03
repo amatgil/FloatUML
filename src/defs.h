@@ -1,8 +1,8 @@
 #include "raylib.h"
 #include "umla.h"
-#include "umls.h"
 #include "umlc.h"
 #include "umlr.h"
+#include "umls.h"
 #include <stdint.h>
 
 #ifndef DEFS
@@ -14,9 +14,9 @@ struct Style {
 };
 
 struct World {
-  struct Classes classes;
-  struct Relacions relacions;
-  struct Style style;
-}
+    struct Classes classes;
+    struct Relacions relacions;
+    struct Style style;
+};
 
 #endif

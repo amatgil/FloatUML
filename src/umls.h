@@ -101,8 +101,9 @@ struct StrSlice umlss_readw(struct StrSliceStream *stream) {
     while ((c = umlss_read(stream)) == ' ') {
     }
 
-    int start = stream->ptr;
-    while ((c = umlss_read(stream)) != 0) {
+    int start = stream->ptr - 1;
+    while (c != ' ' && c != 0) {
+        c = umlss_read(stream);
     }
 
     int end = stream->ptr;
