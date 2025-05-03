@@ -1,6 +1,7 @@
 #include "defs.h"
 #include "raylib.h"
 #include "umla.h"
+#include "umlc.h"
 #include "umls.h"
 
 void umld_class(struct Classe c, struct Style *style) {
