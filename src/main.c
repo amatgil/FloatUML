@@ -30,6 +30,7 @@ int main(void) {
     struct Classes classes = umlc_init();
     struct Classe* a = umlc_append(&classes, create_class("Hello", 200, 200));
     struct Classe* b = umlc_append(&classes, create_class("Goodbye", 400, 400));
+    struct Classe* c = umlc_append(&classes, create_class("Third option", 600, 350));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
@@ -39,6 +40,9 @@ int main(void) {
     umla_append(&b->attribs, create_attribute("skjdhf", "String", 0, -1));
     umla_append(&b->attribs, create_attribute("very yes", "String", 0, -1));
     umla_append(&b->attribs, create_attribute("wahooo", "Data", 1, 1));
+
+    umla_append(&c->attribs, create_attribute("dia", "String", 0, -1));
+    umla_append(&c->attribs, create_attribute("existencia", "Int", 0, -1));
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
@@ -71,7 +75,7 @@ int main(void) {
             } else {
                 // Nothing is currently held
                 for (int i = 0; i < classes.len; ++i) {
-                    Rectangle rect = umld_rect_of(classes.cs[i]);
+                  Rectangle rect = umld_rect_of(classes.cs[i], &style);
                     if (CheckCollisionPointRec(mpos, rect)) {
                         held_state.curr = &classes.cs[i];
                     }
