@@ -9,6 +9,7 @@
 // Note that this is a vector of pointers
 struct Relacio {
     struct Classe** cs; 
+    Vector2* multiplicitats;
     uint32_t len;
     uint32_t capacity;
 };
@@ -18,6 +19,7 @@ struct Relacio umlr_init() {
     uint32_t default_capacity = 16;
     struct Relacio r = {
         .cs = malloc(default_capacity * sizeof(struct Classe*)),
+        .multiplicitats = malloc(default_capacity * sizeof(struct Classe*)),
         .len = 0,
         .capacity = default_capacity};
     return r;
