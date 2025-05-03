@@ -13,27 +13,13 @@ struct HeldState {
   struct Classe* curr; // NULL if nothing is held
 };
 
-int main(void) {
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
-    const int screenWidth = 1000;
-    const int screenHeight = 1000;
-
-    struct HeldState held_state = { .curr = NULL };
-
-    InitWindow(screenWidth, screenHeight, "floatUML");
-
-    SetTargetFPS(60);
-
-    struct Style style;
+void startup_example(struct Classes* classes, struct Relacions* relacions, struct Style* style) {
     style.font = LoadFont("external/Consolas/consolas.ttf");
     style.fontsize = 32;
 
-    struct Classes classes = umlc_init();
-    struct Relacions relacions = umlrs_init();
-
-    struct Classe* a = umlc_append(&classes, create_class("Hello", 200, 200, NULL));
-    struct Classe* b = umlc_append(&classes, create_class("Goodbye", 400, 400, NULL));
-    struct Classe* c = umlc_append(&classes, create_class("Third option", 600, 350, NULL));
+    struct Classe* a = umlc_append(classes, create_class("Hello", 200, 200, NULL));
+    struct Classe* b = umlc_append(classes, create_class("Goodbye", 400, 400, NULL));
+    struct Classe* c = umlc_append(classes, create_class("Third option", 600, 350, NULL));
 
     umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
     umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
@@ -49,12 +35,29 @@ int main(void) {
     struct Relacio r1 = umlr_init();
     umlr_append(&r1, a);
     umlr_append(&r1, b);
-    umlrs_append(&relacions, r1);
+    umlrs_append(relacions, r1);
 
     struct Relacio r2 = umlr_init();
     umlr_append(&r2, b);
     umlr_append(&r2, c);
-    umlrs_append(&relacions, r2);
+    umlrs_append(relacions, r2);
+}
+
+int main(void) {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    const int screenWidth = 1000;
+    const int screenHeight = 1000;
+
+    struct HeldState held_state = { .curr = NULL };
+
+    InitWindow(screenWidth, screenHeight, "floatUML");
+
+    SetTargetFPS(60);
+
+    struct Style style;
+    struct Classes classes = umlc_init();
+    struct Relacions relacions = umlrs_init();
+    startup_example(&classes, &relacions, &style);
 
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
