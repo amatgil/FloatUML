@@ -63,10 +63,6 @@ struct World startup_example() {
 int main(void) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); 
-
-    const int true_screen_width = 1000;
-    const int true_screen_height = 1000;
-
     int screenWidth = 1000;
     int screenHeight = 1000;
     float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
@@ -93,8 +89,9 @@ int main(void) {
 
     while (!WindowShouldClose())
     {
-        screenHeight = GetScreenHeight();
-        screenWidth = GetScreenWidth();
+        int new_height = GetScreenHeight();
+        int new_width = GetScreenWidth();
+
         width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
         textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea, screenHeight};
 
@@ -110,8 +107,11 @@ int main(void) {
             DrawLine(0, y, screenWidth, y, LIGHTGRAY);
         }
 
-        for (int i = 0; i < w.classes.len; ++i)
+        for (int i = 0; i < w.classes.len; ++i) {
+            w.classes.cs[i].pos.x = w.classes.cs[i].pos.x * new_width / screenWidth;
+            w.classes.cs[i].pos.y = w.classes.cs[i].pos.y * new_height / screenHeight;
             umld_class(w.classes.cs[i], &w.style);
+        }
 
         for (int i = 0; i < w.relacions.len; ++i)
             draw_relation(w.relacions.rs[i], &w.style);
@@ -190,6 +190,9 @@ int main(void) {
                  && st.text_cursor < MAX_TEXT_IN_TEXTAREA
                  && st.text_cursor < st.text_final_index)
             st.text_cursor++;
+
+        screenHeight = new_height;
+        screenWidth = new_width;
     }
 
     CloseWindow(); // Close window and OpenGL context
