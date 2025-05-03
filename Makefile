@@ -3,7 +3,7 @@ CFLAGS = -m64 -std=c99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual
 
 
 desktop:
-	gcc src/main.c -I $(RAYLIB) -L $(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o floatUML $(CFLAGS)
+	gcc src/main.c -O2 -I $(RAYLIB) -L $(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o floatUML $(CFLAGS)
 
 clean:
 	rm floatUML
