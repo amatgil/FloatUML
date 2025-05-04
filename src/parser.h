@@ -6,8 +6,9 @@
 #include <stdlib.h>
 
 int search_class(struct World *w, char *name) {
+    struct StrSlice n = umls_from(name);
     for (int i = 0; i < w->classes.len; i++) {
-        if (strcmp(name, w->classes.cs[i].nom)) {
+        if (umls_cmp_cstr(&n, w->classes.cs[i].nom)) {
             return i;
         }
         printf("'%s' and '%s' are different\n", name, w->classes.cs[i].nom);
