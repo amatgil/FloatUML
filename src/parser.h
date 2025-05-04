@@ -110,9 +110,8 @@ int32_t parse(struct StrSlice *a, struct World *w) {
                 else
                     umlr_append(&parsed_rel, &parsed_classes.cs[j],
                                 mul_lower_int, mul_higher_int);
-
-                umlrs_append(&parsed_relacions, parsed_rel);
             }
+            umlrs_append(&parsed_relacions, parsed_rel);
         }
 
         for (int i = 0; i < parsed_classes.len; ++i) {
@@ -140,10 +139,12 @@ int32_t parse(struct StrSlice *a, struct World *w) {
                     parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
             }
         }
-        printf(
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
+               "(%d rels)\n",
+               parsed_relacions.len);
         w->relacions = parsed_relacions; // This is 100% a memory leak, we're
                                          // leaking the previous relacions
+
         // TODO: instead of memory leaking above, drop the Relacions safely
 
         // TODO: free parsed_{classes, attributes}
