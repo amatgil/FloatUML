@@ -2,7 +2,7 @@
 
 # Compile raylib
 if [ $1 == "web" ]; then
-	(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_WEB);
+	(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_WEB -B)
 	make web
 else
 	(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_DESKTOP);

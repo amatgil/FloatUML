@@ -30,69 +30,57 @@ struct State {
     Bool saving_to_texture;
 };
 
-struct World startup_example() {
-    struct World w = umlw_init("external/Consolas/consolas.ttf", 22);
+void UpdateDrawFrame(void); // Update and Draw one frame (for web)
 
-    struct Classe *a =
-        umlc_append(&w.classes, create_class("Hello", 200, 200, NULL));
-    struct Classe *b =
-        umlc_append(&w.classes, create_class("Goodbye", 400, 400, NULL));
-    struct Classe *c =
-        umlc_append(&w.classes, create_class("Third option", 600, 350, NULL));
-    struct Classe *d =
-        umlc_append(&w.classes, create_class("NoAttrs", 200, 550, NULL));
+int screenWidth;
+int screenHeight;
+float width_textarea;
+Rectangle textarea;
 
-    umla_append(&a->attribs, create_attribute("dni", "String", 0, -1));
-    umla_append(&a->attribs, create_attribute("nom", "String", 0, -1));
-    umla_append(&a->attribs, create_attribute("edat", "Int", 1, 1));
+TextArea tarea;
 
-    umla_append(&b->attribs, create_attribute("skjdhf", "String", 0, -1));
-    umla_append(&b->attribs, create_attribute("very yes", "String", 0, -1));
-    umla_append(&b->attribs, create_attribute("wahooo", "Data", 1, 1));
+struct State st = {
+    .curr_held = NULL,
+    .textbox_up = false,
+    .saving_to_texture = false,
+};
 
-    umla_append(&c->attribs, create_attribute("dia", "String", 0, -1));
-    umla_append(&c->attribs, create_attribute("existencia", "Int", 0, -1));
+uint32_t cellSize = 32;
 
-    struct Relacio r1 = umlr_init();
-    umlr_append(&r1, a, 7, 10);
-    umlr_append(&r1, b, 0, 200);
-    umlr_append(&r1, c, 0, -1);
-    umlrs_append(&w.relacions, r1);
-
-    struct Relacio r2 = umlr_init();
-    umlr_append(&r2, b, 1, 10);
-    umlr_append(&r2, c, 2, -1);
-    umlrs_append(&w.relacions, r2);
-    return w;
-}
+RenderTexture2D save_target;
+struct World w;
 
 int main(void) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    int screenWidth = 1000;
-    int screenHeight = 700;
-    float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
-    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
-                          screenHeight};
-
-    TextArea tarea = create_text_area(textarea);
-
-    struct State st = {
-        .curr_held = NULL,
-        .textbox_up = false,
-        .saving_to_texture = false,
-    };
-
-    InitWindow(screenWidth, screenHeight, "floatUML");
-
-    SetTargetFPS(60);
-
-    struct World w = umlw_init("external/Consolas/consolas.ttf", 22);
     SetTextureFilter(w.style.font.texture, TEXTURE_FILTER_TRILINEAR);
 
-    uint32_t cellSize = 32;
+    screenWidth = 1000;
+    screenHeight = 700;
+    width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
+    textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea,
+                           screenHeight};
 
-    RenderTexture2D save_target = LoadRenderTexture(screenWidth, screenHeight);
+    w = umlw_init("external/Consolas/consolas.ttf", 22);
+    tarea = create_text_area(textarea);
+    InitWindow(screenWidth, screenHeight, "floatUML");
+    save_target = LoadRenderTexture(screenWidth, screenHeight);
+
+#if defined(PLATFORM_WEB)
+    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+#else
+    SetTargetFPS(60);
+
+    while (!WindowShouldClose())
+        UpdateDrawFrame();
+
+#endif
+    CloseWindow(); // Close window and OpenGL context
+
+    return 0;
+}
+
+void UpdateDrawFrame(void) {
 
     while (!WindowShouldClose()) {
         int new_height = GetScreenHeight();
@@ -199,8 +187,4 @@ int main(void) {
         screenHeight = new_height;
         screenWidth = new_width;
     }
-
-    CloseWindow(); // Close window and OpenGL context
-
-    return 0;
 }

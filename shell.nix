@@ -24,6 +24,8 @@ let
     clang-tools
     valgrind
     gdb
+    nodejs_23
+    python314
   ];
 in
 pkgs.mkShell {
