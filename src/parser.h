@@ -66,6 +66,15 @@ void parse(struct StrSlice *a, struct World *w) {
             } else {
                 umlc_append(&w->classes, new);
             }
+        } else if (umls_cmp_cstr(&word, "rel")) {
+            struct StrSlice c1 = umlss_readw(&b);
+            struct StrSlice c2 = umlss_readw(&b);
+
+            int idx1;
+            int idx2;
+            if ((idx1 = search_class(w, c1)) > 0 &&
+                (idx2 = search_class(w, c2)) > 0) {
+            }
         }
     }
 }

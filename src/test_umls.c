@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) {
     struct StrSlice a = umls_from("hello world!");
 
-    printf(a.text);
+    printf("%s", a.text);
     printf("\n");
 
     struct StrSlice c = umls_from("world!");
@@ -15,12 +15,14 @@ int main(int argc, char *argv[]) {
 
     printf("Read Caracter: %c\n", umlss_read(&b));
     printf("Read Word: ");
-    printf(umlss_readw(&b).text);
+    printf("%s", umlss_readw(&b).text);
     printf("\n");
     struct StrSlice word = umlss_readw(&b);
     printf("Length: %d\n", word.len);
     printf("Cmp result: %d\n", umls_cmp_cstr(&word, "world!"));
-    printf(word.text);
+    printf("%s", word.text);
+    printf("\n");
+    printf("%s", umlss_readsimb(&b).text);
     printf("\n");
 
     return EXIT_SUCCESS;

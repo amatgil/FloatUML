@@ -2,8 +2,8 @@
 #include "umls.h"
 
 int main(int argc, char *argv[]) {
-    struct StrSlice a = umls_from("class Persona { nom : String } class Gos { "
-                                  "nom : String amo : String }");
+    struct StrSlice a = umls_from("class Persona { nom : String }; class Gos { "
+                                  "nom : String; amo : String }");
 
     struct World w;
     w.classes = umlc_init();
