@@ -2,8 +2,10 @@
 #include "raylib.h"
 #include "umls.h"
 
+#define MAX_CPTS 1000
+
 typedef struct {
-    int cpts[1000];
+    int cpts[MAX_CPTS];
     int cursorPos;
     Rectangle area;
 } TextArea;
@@ -69,15 +71,13 @@ void umld_text_area(TextArea *a, struct World *w) {
 void backspace_textarea(TextArea *a) {
     printf("Backpace entered!\n");
     int i = a->cursorPos;
-    int k = a->cpts[i];
     if (i == 0)
         return;
 
     // whar
-    while (k != 0) {
-        a->cpts[i] = a->cpts[i + 1];
+    while (i > 0 && i < MAX_CPTS - 1) {
+        a->cpts[i - 1] = a->cpts[i];
         i++;
-        k = a->cpts[i];
     }
     a->cursorPos--;
 }
@@ -106,6 +106,7 @@ int uml_text_area_pull_events(TextArea *a) {
         }
     }
 
+    // Allow holding down da key
     if (IsKeyPressedRepeat(KEY_BACKSPACE))
         backspace_textarea(a);
     return update;
