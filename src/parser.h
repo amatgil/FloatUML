@@ -1,17 +1,17 @@
 #include "defs.h"
 #include "umla.h"
 #include "umlc.h"
+#include "umlr.h"
 #include "umls.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-int search_class(struct World *w, char *name) {
+int search_class(struct Classes *classes, char *name) {
     struct StrSlice n = umls_from(name);
-    for (int i = 0; i < w->classes.len; i++) {
-        if (umls_cmp_cstr(&n, w->classes.cs[i].nom)) {
+    for (int i = 0; i < classes->len; i++) {
+        if (umls_cmp_cstr(&n, classes->cs[i].nom)) {
             return i;
         }
-        printf("'%s' and '%s' are different\n", name, w->classes.cs[i].nom);
     }
     return -1;
 }
@@ -70,27 +70,83 @@ int32_t parse(struct StrSlice *a, struct World *w) {
         } else if (umls_cmp_cstr(&word, "rel")) {
             if (umls_cmp_cstr(&word, ""))
                 return -1;
-            struct StrSlice c1 = umlss_readw(&b);
-            if (umls_cmp_cstr(&c1, ""))
+            // rel { A 0 0 B 1 1 }
+
+            struct StrSlice lbracket = umlss_readw(&b);
+            if (!umls_cmp_cstr(&lbracket, "{"))
                 return -1;
-            struct StrSlice c2 = umlss_readw(&b);
-            if (umls_cmp_cstr(&c2, ""))
-                return -1;
 
-            // umlrs_append(&parsed_relacions, );
+            struct Relacio parsed_rel = umlr_init();
+            while (1) {
+                struct StrSlice nom = umlss_readw(&b);
+                if (umls_cmp_cstr(&nom, "}"))
+                    break;
+                if (umls_cmp_cstr(&nom, ""))
+                    return -1;
+                struct StrSlice mul_lower = umlss_readw(&b);
+                if (umls_cmp_cstr(&mul_lower, ""))
+                    return -1;
+                struct StrSlice mul_higher = umlss_readw(&b);
+                if (umls_cmp_cstr(&mul_higher, ""))
+                    return -1;
+
+                int mul_lower_int, mul_higher_int;
+                if (umls_cmp_cstr(&mul_lower, "*")) {
+                    mul_lower_int = -1;
+                } else {
+                    mul_lower_int = TextToInteger(mul_lower.text);
+                }
+                if (umls_cmp_cstr(&mul_higher, "*")) {
+                    mul_higher_int = -1;
+                } else {
+                    mul_higher_int = TextToInteger(mul_higher.text);
+                }
+
+                TextToInteger(mul_lower.text);
+
+                int j = search_class(&parsed_classes, nom.text);
+                if (j < 0)
+                    return -1;
+                else
+                    umlr_append(&parsed_rel, &parsed_classes.cs[j],
+                                mul_lower_int, mul_higher_int);
+
+                umlrs_append(&parsed_relacions, parsed_rel);
+            }
         }
-    }
 
-    for (int i = 0; i < parsed_classes.len; ++i) {
-        struct Classe parsed_class = parsed_classes.cs[i];
-        int j = search_class(w, parsed_class.nom);
-        if (j == -1) {
-            umlc_append(&w->classes, parsed_class);
-        } else {
-            parsed_class.pos = w->classes.cs[j].pos;
-            w->classes.cs[j] = parsed_class;
+        for (int i = 0; i < parsed_classes.len; ++i) {
+            struct Classe parsed_class = parsed_classes.cs[i];
+            int j = search_class(&w->classes, parsed_class.nom);
+            if (j == -1) {
+                umlc_append(&w->classes, parsed_class);
+            } else {
+                parsed_class.pos = w->classes.cs[j].pos;
+                w->classes.cs[j] = parsed_class;
+            }
         }
-    }
+        // TODO: iterate over world, delete if doesn't exist in parsed
 
+        // Move pointers from inner (towards parsed_relations) to outer (towards
+        // world)
+        for (int i = 0; i < parsed_relacions.len; ++i) {
+            struct Relacio rel = parsed_relacions.rs[i];
+            for (int j = 0; j < rel.len; ++j) {
+                struct Classe *class_in_rel = rel.cs[j];
+                int k = search_class(&w->classes, class_in_rel->nom);
+                if (k == -1)
+                    return -1;
+                else
+                    parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
+            }
+        }
+        printf(
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+        w->relacions = parsed_relacions; // This is 100% a memory leak, we're
+                                         // leaking the previous relacions
+        // TODO: instead of memory leaking above, drop the Relacions safely
+
+        // TODO: free parsed_{classes, attributes}
+    }
     return 0;
 }
