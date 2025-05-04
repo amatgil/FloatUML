@@ -69,7 +69,7 @@ int main(void) {
     int screenWidth = 1000;
     int screenHeight = 700;
     float width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
-    Rectangle textarea = {screenWidth - width_textarea, 0, width_textarea,
+    Rectangle textarea = {screenWidth - width_textarea, 10, width_textarea,
                           screenHeight};
 
     TextArea tarea = create_text_area(textarea);
@@ -144,10 +144,11 @@ int main(void) {
             }
         } else {
             char *text = "F10 to toggle terminal";
-            DrawText(text,
-                     screenWidth - MeasureText(text, w.style.fontsize) -
-                         TEXTBOX_LEFTPAD,
-                     screenHeight - w.style.fontsize, w.style.fontsize, BLACK);
+            DrawTextEx(w.style.font, text,
+                       (Vector2){screenWidth -
+                                     MeasureText(text, w.style.fontsize) - 40,
+                                 screenHeight - w.style.fontsize},
+                       w.style.fontsize, 0, BLACK);
         }
 
         if (st.saving_to_texture)
@@ -177,22 +178,24 @@ int main(void) {
                     }
                 }
             }
-        } else
+        } else {
             st.curr_held = NULL;
+        }
 
-        if (st.saving_to_texture) {
-            ExportImage(LoadImageFromTexture(save_target.texture),
-                        "/tmp/output.png");
+        if (st.saving_to_texture == true) {
+            Image img = LoadImageFromTexture(save_target.texture);
+            ImageFlipVertical(&img);
+            ExportImage(img, "/tmp/output.png");
         }
         st.saving_to_texture = false;
 
         if (IsKeyPressed(KEY_F10))
             st.textbox_up = !st.textbox_up;
-        if (IsKeyPressed(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-            printf("saving to texture: on \n");
-            st.saving_to_texture = true;
-        }
 
+        /* if (IsKeyPressed(KEY_S) && IsKeyDown(KEY_LEFT_CONTROL)) { */
+        /*     printf("saving to texture: on \n"); */
+        /*     st.saving_to_texture = true; */
+        /* } */
         screenHeight = new_height;
         screenWidth = new_width;
     }
