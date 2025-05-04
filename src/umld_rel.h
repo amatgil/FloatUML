@@ -33,15 +33,6 @@ void draw_y (Vector2 center_father, Vector2 center_son, Rectangle arect, Rectang
     DrawLineEx(center_father, (Vector2) {center_father.x, (center_father.y+center_son.y)/2}, 3, BLACK);
     DrawLineEx((Vector2) {center_father.x, (center_father.y+center_son.y)/2}, (Vector2) {center_son.x, (center_father.y+center_son.y)/2}, 3, BLACK);
     DrawLineEx(center_son, (Vector2) {center_son.x, (center_father.y+center_son.y)/2}, 3, BLACK);
-    /*Vector2 punt = {center_father.x, (center_father.y+center_son.y)/2};
-    Vector2 inter =
-                int_seg_rect (center_father, punt, arect);
-    int constant;
-    if (inter.y < center_son.y) constant = 80;
-    else constant = -80;
-    Vector2 t1 = {inter.x+10, inter.y+constant};
-    Vector2 t2 = {inter.x-10, inter.y+constant};
-    DrawTriangle(inter, t1, t2, RED);*/
 }
 
 void draw_x (Vector2 center_father, Vector2 center_son, Rectangle arect, Rectangle brect)
@@ -49,14 +40,6 @@ void draw_x (Vector2 center_father, Vector2 center_son, Rectangle arect, Rectang
     DrawLineEx(center_father, (Vector2) {(center_father.x+center_son.x)/2, center_father.y}, 3, BLACK);
     DrawLineEx((Vector2) {(center_father.x+center_son.x)/2, center_father.y}, (Vector2) {(center_father.x+center_son.x)/2, center_son.y}, 3, BLACK);
     DrawLineEx(center_son, (Vector2) {(center_father.x+center_son.x)/2, center_son.y}, 3, BLACK);
-    /*Vector2 inter =
-                int_seg_rect (center_father, (Vector2) {center_father.x, (center_father.y+center_son.y)/2}, arect);
-    int constant;
-    if (inter.x < center_father.x) constant = -10;
-    else constant = 10;
-    Vector2 t1 = {inter.x+constant, inter.y+10};
-    Vector2 t2 = {inter.x+constant, inter.y-10};
-    DrawTriangle(inter, t1, t2, RED);*/
 }
 
 void draw_subclass_relation(struct Classe father, struct Classe son, struct Style *style)
