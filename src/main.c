@@ -24,6 +24,7 @@ typedef int32_t Bool;
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
+    Bool saving_to_texture;
 };
 
 struct World startup_example() {
@@ -76,6 +77,7 @@ int main(void) {
     struct State st = {
         .curr_held = NULL,
         .textbox_up = false,
+        .saving_to_texture = false,
     };
 
     InitWindow(screenWidth, screenHeight, "floatUML");
@@ -87,15 +89,25 @@ int main(void) {
 
     uint32_t cellSize = 32;
 
+    RenderTexture2D save_target = LoadRenderTexture(screenWidth, screenHeight);
+
     while (!WindowShouldClose()) {
         int new_height = GetScreenHeight();
         int new_width = GetScreenWidth();
+
+        // This also leaks memory (we lose the old texture)
+        if (new_height != screenHeight || new_width != screenWidth)
+            save_target = LoadRenderTexture(new_width, new_width);
 
         width_textarea = (float)screenWidth / (float)PERCENTATGE_MIDA_TEXTBOX;
         textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea,
                                screenHeight};
 
-        BeginDrawing();
+        if (st.saving_to_texture)
+            BeginTextureMode(save_target);
+        else
+            BeginDrawing();
+
         ClearBackground(RAYWHITE);
 
         for (int x = 0; x <= screenWidth; x += cellSize) {
@@ -138,7 +150,10 @@ int main(void) {
                      screenHeight - w.style.fontsize, w.style.fontsize, BLACK);
         }
 
-        EndDrawing();
+        if (st.saving_to_texture)
+            EndTextureMode();
+        else
+            EndDrawing();
 
         if (IsMouseButtonDown(0)) {
             if (st.curr_held) {
@@ -165,8 +180,18 @@ int main(void) {
         } else
             st.curr_held = NULL;
 
+        if (st.saving_to_texture) {
+            ExportImage(LoadImageFromTexture(save_target.texture),
+                        "/tmp/output.png");
+        }
+        st.saving_to_texture = false;
+
         if (IsKeyPressed(KEY_F10))
             st.textbox_up = !st.textbox_up;
+        if (IsKeyPressed(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
+            printf("saving to texture: on \n");
+            st.saving_to_texture = true;
+        }
 
         screenHeight = new_height;
         screenWidth = new_width;
