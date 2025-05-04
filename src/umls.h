@@ -81,8 +81,9 @@ struct StrSliceStream {
 };
 
 char umlss_read(struct StrSliceStream *stream) {
-    if (stream->ptr > stream->str.len)
-        printf("Reading out of bounds! len %d\n", stream->str.len);
+    /*if (stream->ptr > stream->str.len + 1)
+          printf("Reading out of bounds! len %d\n", stream->str.len);*/
+
     return stream->str.text[stream->ptr++];
 }
 
@@ -95,7 +96,6 @@ struct StrSliceStream umlss_init(struct StrSlice *str) {
 
 struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
     if (a->len < end || start > end) {
-        printf("Error! in the substring indexes!\n");
         return umls_init();
     }
     struct StrSlice new = umls_init();

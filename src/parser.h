@@ -70,13 +70,23 @@ int32_t parse(struct StrSlice *a, struct World *w) {
         } else if (umls_cmp_cstr(&word, "rel")) {
             if (umls_cmp_cstr(&word, ""))
                 return -1;
-            // rel { A 0 0 B 1 1 }
+            // rel assname { A 0 0 B 1 1 C 2 2 }
+            struct Relacio parsed_rel = umlr_init();
 
             struct StrSlice lbracket = umlss_readw(&b);
-            if (!umls_cmp_cstr(&lbracket, "{"))
-                return -1;
+            if (!umls_cmp_cstr(&lbracket, "{")) {
+                // We assume it's a name, but we must follow up with a bracket
+                int k = search_class(&parsed_classes, lbracket.text);
+                if (k == -1)
+                    return -1;
+                else
+                    parsed_rel.associativa = &parsed_classes.cs[k];
 
-            struct Relacio parsed_rel = umlr_init();
+                lbracket = umlss_readw(&b);
+                if (!umls_cmp_cstr(&lbracket, "{"))
+                    return -1;
+            }
+
             while (1) {
                 struct StrSlice nom = umlss_readw(&b);
                 if (umls_cmp_cstr(&nom, "}"))
@@ -129,19 +139,22 @@ int32_t parse(struct StrSlice *a, struct World *w) {
         // Move pointers from inner (towards parsed_relations) to outer (towards
         // world)
         for (int i = 0; i < parsed_relacions.len; ++i) {
-            struct Relacio rel = parsed_relacions.rs[i];
-            for (int j = 0; j < rel.len; ++j) {
-                struct Classe *class_in_rel = rel.cs[j];
+            // the associativa of the relacio
+            if (parsed_relacions.rs[i].associativa != NULL) {
+                int k = search_class(&w->classes,
+                                     parsed_relacions.rs[i].associativa->nom);
+                assert(k >= 0);
+                parsed_relacions.rs[i].associativa = &w->classes.cs[k];
+            }
+
+            // All the classes that form la relacio
+            for (int j = 0; j < parsed_relacions.rs[i].len; ++j) {
+                struct Classe *class_in_rel = parsed_relacions.rs[i].cs[j];
                 int k = search_class(&w->classes, class_in_rel->nom);
-                if (k == -1)
-                    return -1;
-                else
-                    parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
+                assert(k >= 0);
+                parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
             }
         }
-        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
-               "(%d rels)\n",
-               parsed_relacions.len);
         w->relacions = parsed_relacions; // This is 100% a memory leak, we're
                                          // leaking the previous relacions
 

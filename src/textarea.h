@@ -69,7 +69,6 @@ void umld_text_area(TextArea *a, struct World *w) {
 }
 
 void backspace_textarea(TextArea *a) {
-    printf("Backpace entered!\n");
     int i = a->cursorPos;
     if (i == 0)
         return;
