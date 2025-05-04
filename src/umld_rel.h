@@ -3,6 +3,7 @@
 #include "umlr.h"
 #include "utils.h"
 #include "intersect.h"
+#include "raymath.h"
 
 void draw_relation(struct Relacio relacio, struct Style *style) {
     Vector2 punt_mig = calcul_punt_mig (relacio, style);
@@ -16,11 +17,41 @@ void draw_relation(struct Relacio relacio, struct Style *style) {
         char buff[2048];
         if (relacio.multiplicitats[i].y == (float)-1.) sprintf(buff,"%.0f..*", relacio.multiplicitats[i].x);
         else sprintf(buff,"%.0f..%.0f", relacio.multiplicitats[i].x, relacio.multiplicitats[i].y);
-        if (punt_mig.x-pt1.x < 0) pt1.x -= strlen(buff)*7;
+        /*if (punt_mig.x-pt1.x < 0) pt1.x -= strlen(buff)*7;
         else pt1.x += 2;
         if (punt_mig.y-pt1.y < 0) pt1.y -= strlen(buff)*2.5;
-        else pt1.y += 2; 
-        DrawTextEx(style->font, buff, pt1, 12, 0, BLACK);
+        else pt1.y += 2;*/ 
+        if (pt1.x == arect.x || pt1.x == (arect.x + arect.width))
+        {
+            if (pt1.x == arect.x) 
+            {
+                if (Vector2Angle((Vector2){0,1}, (Vector2){punt_mig.x-pt1.x, punt_mig.y-pt1.y}) > PI/2) pt1.y += 10;
+                else pt1.y -= 20;
+                pt1.x -= strlen(buff)*15;
+            }
+            else 
+            {
+                if (Vector2Angle((Vector2){0,-1}, (Vector2){punt_mig.x-pt1.x, punt_mig.y-pt1.y}) > PI/2) pt1.y += 10;
+                else pt1.y -= 20;
+                pt1.x += 10;
+            }
+        }
+        else if (pt1.y == arect.y || pt1.y == (arect.y + arect.height))
+        {
+            if (pt1.y == arect.y) 
+            {
+                if (Vector2Angle((Vector2){1,0}, (Vector2){punt_mig.x-pt1.x, punt_mig.y-pt1.y}) > PI/2) pt1.x += 30;
+                else pt1.x -= 30;
+                pt1.y -= 20;
+            }
+            else    
+            {
+                if (Vector2Angle((Vector2){-1,0}, (Vector2){punt_mig.x-pt1.x, punt_mig.y-pt1.y}) > PI/2) pt1.x += 30;
+                else pt1.x -= 30;
+                pt1.y += 10;
+            }
+        }
+        DrawTextEx(style->font, buff, pt1, 20, 0, BLACK);
     }
 
     if (relacio.associativa != NULL) {
