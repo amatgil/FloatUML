@@ -61,8 +61,8 @@ struct Classe **umlr_append(struct Relacio *a,
     return &a->cs[a->len-1];
 }
 
-void umlr_set_associativa(struct Relacio r, struct Classe *c) {
-    r.associativa = c;
+void umlr_set_associativa(struct Relacio* r, struct Classe *c) {
+    r->associativa = c;
 }
 
 struct Relacions {
