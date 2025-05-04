@@ -155,9 +155,6 @@ int32_t parse(struct StrSlice *a, struct World *w) {
                 parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
             }
         }
-        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
-               "(%d rels)\n",
-               parsed_relacions.len);
         w->relacions = parsed_relacions; // This is 100% a memory leak, we're
                                          // leaking the previous relacions
 
