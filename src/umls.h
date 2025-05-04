@@ -96,7 +96,7 @@ struct StrSliceStream umlss_init(struct StrSlice *str) {
 struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
     if (a->len < end || start > end) {
         printf("Error! in the substring indexes!\n");
-        // AQUI VA UN RETURN O ALGO
+        return umls_init();
     }
     struct StrSlice new = umls_init();
     umls_resize(&new, end - start + 1);
