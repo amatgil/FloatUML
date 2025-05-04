@@ -139,24 +139,20 @@ int32_t parse(struct StrSlice *a, struct World *w) {
         // Move pointers from inner (towards parsed_relations) to outer (towards
         // world)
         for (int i = 0; i < parsed_relacions.len; ++i) {
-            struct Relacio rel = parsed_relacions.rs[i];
             // the associativa of the relacio
-            if (rel.associativa != NULL) {
-                int k = search_class(&w->classes, rel.associativa->nom);
-                if (k == -1)
-                    return -1;
-                else
-                    rel.associativa = &w->classes.cs[k];
+            if (parsed_relacions.rs[i].associativa != NULL) {
+                int k = search_class(&w->classes,
+                                     parsed_relacions.rs[i].associativa->nom);
+                assert(k >= 0);
+                parsed_relacions.rs[i].associativa = &w->classes.cs[k];
             }
 
             // All the classes that form la relacio
-            for (int j = 0; j < rel.len; ++j) {
-                struct Classe *class_in_rel = rel.cs[j];
+            for (int j = 0; j < parsed_relacions.rs[i].len; ++j) {
+                struct Classe *class_in_rel = parsed_relacions.rs[i].cs[j];
                 int k = search_class(&w->classes, class_in_rel->nom);
-                if (k == -1)
-                    return -1;
-                else
-                    parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
+                assert(k >= 0);
+                parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
             }
         }
         printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
