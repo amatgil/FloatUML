@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
 
 # Compile raylib
-(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_DESKTOP)
+if [ $1 == "web" ]; then
+	(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_WEB);
+	make web
+else
+	(cd external/raylib-5.5/src/ && make PLATFORM=PLATFORM_DESKTOP);
+	make desktop
+fi
 
-# Compile project
-make desktop
