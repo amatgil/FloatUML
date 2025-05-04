@@ -53,23 +53,23 @@ void umld_class(struct Classe c, struct Style *style) {
     }
 
     Vector2 p_f = {c.pos.x, c.pos.y + (nattrs + 1) * m_colon.y + marge};
-    DrawLineEx(c.pos, p_f, 3.5, BLACK); // vertical 1
+    DrawLineEx(c.pos, p_f, 2.5, BLACK); // vertical 1
 
     p_f = (Vector2){c.pos.x + max, c.pos.y};
-    DrawLineEx(c.pos, p_f, 3.5, BLACK); // horitzontal 1
+    DrawLineEx(c.pos, p_f, 2.5, BLACK); // horitzontal 1
 
     p_f = (Vector2){c.pos.x + max, c.pos.y + m_colon.y};
     Vector2 p_i = {c.pos.x, c.pos.y + m_colon.y};
-    DrawLineEx(p_i, p_f, 3, BLACK); // horitzontal 2
+    DrawLineEx(p_i, p_f, 2, BLACK); // horitzontal 2
 
     p_f = (Vector2){c.pos.x + max, c.pos.y + (nattrs + 1) * m_colon.y + marge};
     p_i =
         (Vector2){c.pos.x, c.pos.y + (nattrs + 1) * m_colon.y + m_colon.y / 3};
-    DrawLineEx(p_i, p_f, 3.5, BLACK); // horitzontal 3
+    DrawLineEx(p_i, p_f, 2.5, BLACK); // horitzontal 3
 
     p_f = (Vector2){c.pos.x + max, c.pos.y + (nattrs + 1) * m_colon.y + marge};
     p_i = (Vector2){c.pos.x + max, c.pos.y};
-    DrawLineEx(p_i, p_f, 3.5, BLACK); // vertical 2
+    DrawLineEx(p_i, p_f, 2.5, BLACK); // vertical 2
 
     // return (Rectangle){c.pos.x, c.pos.y, max, m_colon.y * (nattrs + 1)};
 }
