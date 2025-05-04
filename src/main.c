@@ -102,7 +102,6 @@ int main(void) {
             DrawLine(x, 0, x, screenHeight, LIGHTGRAY);
         }
 
-        // Dibujar líneas horizontales
         for (int y = 0; y <= screenHeight; y += cellSize) {
             DrawLine(0, y, screenWidth, y, LIGHTGRAY);
         }
