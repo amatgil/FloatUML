@@ -12,6 +12,9 @@
 #include "umls.h"
 #include "utils.h"
 #include <stdint.h>
+#if defined(PLATFORM_WEB)
+#include <emscripten/emscripten.h>
+#endif
 
 typedef int32_t Bool;
 
