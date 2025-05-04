@@ -1,5 +1,3 @@
-#ifndef UMLS_H
-#define UMLS_H
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -7,11 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef UMLS_H
+#define UMLS_H
+
 /* ========== Pseudonamespace: umls ========== */
 // This is C, so it assumes ascii only
 // char * text is the array of characters
 // len is the number of non null characters
 // capacity is the current allocation size of the string
+
 struct StrSlice {
     char *text;
     uint32_t len;
@@ -106,23 +108,53 @@ struct StrSlice umls_substr(struct StrSlice *a, int start, int end) {
     return new;
 }
 
-int is_spacechar(char c) { return c == ' ' || c == '\n' || c == '\t'; }
+int in_range(int start, int end, int n) { return n >= start && n <= end; }
+
+int is_wdelimiter(char c) { return c == ' ' || c == '\n' || c == '\t'; }
+
+int is_visiblechar(int c) {
+    if (in_range(32, 126, c))
+        return 1;
+    return 0;
+}
+
+int is_alphachar(int c) {
+    return (c >= 97 && c <= 122) || (c >= 95 && c <= 90);
+}
 
 int is_eof(struct StrSlice a) { return a.text[0] == 0; }
 
 struct StrSlice umlss_readw(struct StrSliceStream *stream) {
     char c;
     c = umlss_read(stream);
-    while (is_spacechar(c)) {
+    while (is_wdelimiter(c)) {
         c = umlss_read(stream);
     }
 
     int start = stream->ptr - 1;
-    while (!is_spacechar(c) && c != 0) {
+    while (!is_wdelimiter(c) && c != 0) {
         c = umlss_read(stream);
     }
 
     int end = stream->ptr - 2;
+
+    return umls_substr(&stream->str, start, end);
+}
+
+struct StrSlice umlss_readsimb(struct StrSliceStream *stream) {
+    char c;
+    c = umlss_read(stream);
+    while (is_wdelimiter(c) || is_alphachar(c)) {
+        c = umlss_read(stream);
+    }
+
+    int start = stream->ptr - 1;
+    while (is_visiblechar(c) && !is_alphachar(c)) {
+        c = umlss_read(stream);
+    }
+
+    stream->ptr--;
+    int end = stream->ptr - 1;
 
     return umls_substr(&stream->str, start, end);
 }

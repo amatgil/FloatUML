@@ -24,11 +24,6 @@ typedef int32_t Bool;
 struct State {
     struct Classe *curr_held; // NULL if nothing is held
     Bool textbox_up;
-    char textbox_text[MAX_TEXT_IN_TEXTAREA];
-    uint32_t text_cursor_col;
-    uint32_t text_cursor_line;
-    uint32_t text_final_index;
-    uint64_t frames_counter;
 };
 
 struct World startup_example() {
@@ -81,10 +76,6 @@ int main(void) {
     struct State st = {
         .curr_held = NULL,
         .textbox_up = false,
-        .text_cursor_col = 0,
-        .text_cursor_line = 0,
-        .textbox_text = {[0 ... MAX_TEXT_IN_TEXTAREA - 1] = ' '},
-        .text_final_index = 0,
     };
 
     InitWindow(screenWidth, screenHeight, "floatUML");
@@ -104,8 +95,6 @@ int main(void) {
         textarea = (Rectangle){screenWidth - width_textarea, 0, width_textarea,
                                screenHeight};
 
-        uml_text_area_pull_events(&tarea);
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -118,11 +107,11 @@ int main(void) {
             DrawLine(0, y, screenWidth, y, LIGHTGRAY);
         }
 
-        for (int i = 0; i < w.classes.len; ++i) {
-            if (w.classes.cs[i].superclasse != NULL)
-                draw_subclass_relation(*w.classes.cs[i].superclasse,
-                                       w.classes.cs[i], &w.style);
-        }
+        /* for (int i = 0; i < w.classes.len; ++i) { */
+        /*     if (w.classes.cs[i].superclasse != NULL) */
+        /*         draw_subclass_relation(*w.classes.cs[i].superclasse, */
+        /*                                w.classes.cs[i], &w.style); */
+        /* } */
 
         for (int i = 0; i < w.classes.len; ++i) {
             w.classes.cs[i].pos.x =
@@ -136,26 +125,12 @@ int main(void) {
             draw_relation(w.relacions.rs[i], &w.style);
 
         if (st.textbox_up) {
+            int update = uml_text_area_pull_events(&tarea);
             umld_text_area(&tarea, &w);
-
-            int update = 0;
-
-            /* if (update) { */
-            /*     printf("Text to parse: %s \n", st.textbox_text); */
-            /*     struct StrSlice texttoparse = umls_from(st.textbox_text); */
-            /*     parse(&texttoparse, &w); */
-            /*     for (int i = 0; i < w.classes.len; i++) { */
-            /*         printf("Class: %s\n", w.classes.cs[i].nom); */
-            /*         for (int j = 0; j < w.classes.cs[i].attribs.len; j++) {
-             */
-            /*             printf("\tAttrib: %s : %s\n", */
-            /*                    w.classes.cs[i].attribs.attrs[j].nom.text, */
-            /*                    w.classes.cs[i].attribs.attrs[j].tipus.text);
-             */
-            /*         } */
-            /*     } */
-            /* } */
-
+            if (update) {
+                struct StrSlice slice = from_cpts_to_strslice(tarea.cpts);
+                parse(&slice, &w);
+            }
         } else {
             char *text = "F10 to toggle terminal";
             DrawText(text,
@@ -193,12 +168,6 @@ int main(void) {
 
         if (IsKeyPressed(KEY_F10))
             st.textbox_up = !st.textbox_up;
-        else if (IsKeyPressed(KEY_LEFT) && st.text_cursor_col > 0)
-            st.text_cursor_col--;
-        else if (IsKeyPressed(KEY_RIGHT) &&
-                 st.text_cursor_col < MAX_TEXT_IN_TEXTAREA &&
-                 st.text_cursor_col < st.text_final_index)
-            st.text_cursor_col++;
 
         screenHeight = new_height;
         screenWidth = new_width;
