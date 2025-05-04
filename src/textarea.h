@@ -70,6 +70,10 @@ void backspace_textarea(TextArea *a) {
     printf("Backpace entered!\n");
     int i = a->cursorPos;
     int k = a->cpts[i];
+    if (i == 0)
+        return;
+
+    // whar
     while (k != 0) {
         a->cpts[i] = a->cpts[i + 1];
         i++;
@@ -101,5 +105,8 @@ int uml_text_area_pull_events(TextArea *a) {
             a->cursorPos++;
         }
     }
+
+    if (IsKeyPressedRepeat(KEY_BACKSPACE))
+        backspace_textarea(a);
     return update;
 }
