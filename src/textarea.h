@@ -66,6 +66,18 @@ void umld_text_area(TextArea *a, struct World *w) {
     }
 }
 
+void backspace_textarea(TextArea *a) {
+    printf("Backpace entered!\n");
+    int i = a->cursorPos;
+    int k = a->cpts[i];
+    while (k != 0) {
+        a->cpts[i] = a->cpts[i + 1];
+        i++;
+        k = a->cpts[i];
+    }
+    a->cursorPos--;
+}
+
 int uml_text_area_pull_events(TextArea *a) {
     int c = GetCharPressed();
     int update = 0;
@@ -80,15 +92,7 @@ int uml_text_area_pull_events(TextArea *a) {
     while ((c = GetKeyPressed()) != 0) {
         update = 1;
         if (c == KEY_BACKSPACE) {
-            printf("Backpace entered!\n");
-            int i = a->cursorPos;
-            int k = a->cpts[i];
-            while (k != 0) {
-                a->cpts[i] = a->cpts[i + 1];
-                i++;
-                k = a->cpts[i];
-            }
-            a->cursorPos--;
+            backspace_textarea(a);
         } else if (c == KEY_ENTER) {
             a->cpts[a->cursorPos] = 10;
             a->cursorPos++;
