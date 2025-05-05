@@ -1,13 +1,17 @@
-use std::rc::Rc;
+use std::{
+    borrow::BorrowMut,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
-use floatuml::{drawing::draw_class, *};
+use floatuml::{drawing::draw_class, utils::rect_of, *};
 use raylib::{
     ffi::{SetConfigFlags, SetTextureFilter},
     prelude::*,
 };
 
 struct State {
-    currently_held: Option<Rc<Classe>>,
+    currently_held: Option<ClassPtr>,
 }
 
 fn main() {
@@ -26,6 +30,9 @@ fn main() {
     let mut screen_height = 700;
 
     let mut w = example(font, 22.0);
+    let mut st = State {
+        currently_held: None,
+    };
 
     while !rl.window_should_close() {
         let new_height = rl.get_screen_height();
@@ -39,23 +46,46 @@ fn main() {
             height: screen_height as f32,
         };
 
+        // Draw
         let mut d = rl.begin_drawing(&thread);
-
         d.clear_background(Color::RAYWHITE);
 
-        for class in &mut w.classes {
+        for class in &w.classes {
             draw_class(&mut d, &class.borrow(), &w.style);
-            //class.superclass.is_some_and(|superr| draw_subclass_relation(&superr, &class, &w.style));
-
-            class.borrow_mut().pos.x *= new_width as f32 / screen_width as f32;
-            class.borrow_mut().pos.y *= new_height as f32 / screen_height as f32;
+            //class.superclass.is_some_and(|superr| draw_subclass_relation(&superr, &class, &w.style)); // TODO: impl
         }
-
+        for relation in &w.rels {
+            //draw_relations(&mut d, relation, &w.style;); // TODO: impl
+        }
         for x in (0..=screen_width).step_by(CELL_SIZE) {
             d.draw_line(x, 0, x, screen_height, Color::LIGHTGRAY);
         }
         for y in (0..=screen_height).step_by(CELL_SIZE) {
             d.draw_line(0, y, screen_width, y, Color::LIGHTGRAY);
+        }
+        drop(d);
+
+        // Mouse/dragging
+        if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {
+            match st.currently_held {
+                Some(ref cl) => cl.deref().borrow_mut().pos += rl.get_mouse_delta(),
+                None => {
+                    let mpos = rl.get_mouse_position();
+                    for class in &w.classes {
+                        if check_collision_point_poly(mpos, &rect_of(class.clone())) {
+                            st.currently_held = Some(class.clone());
+                        }
+                    }
+                }
+            }
+        } else {
+            st.currently_held = None;
+        }
+
+        // Update vals
+        for class in &w.classes {
+            class.deref().borrow_mut().pos *= new_width as f32 / screen_width as f32;
+            class.deref().borrow_mut().pos.y *= new_height as f32 / screen_height as f32;
         }
 
         (screen_height, screen_width) = (new_height, new_width);

@@ -1,10 +1,11 @@
 pub mod drawing;
+pub mod utils;
 
 use raylib::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 
-type Multiplicitat = Option<u32>;
-type ClassPtr = Rc<RefCell<Classe>>;
+pub type Multiplicitat = Option<u32>;
+pub type ClassPtr = Rc<RefCell<Classe>>;
 
 pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 4.0;
 pub const CELL_SIZE: usize = 32;
