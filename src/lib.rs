@@ -1,9 +1,11 @@
 pub mod drawing;
 
 use raylib::prelude::*;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 type Multiplicitat = Option<u32>;
+type ClassPtr = Rc<RefCell<Classe>>;
+
 pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 4.0;
 pub const CELL_SIZE: usize = 32;
 
@@ -17,8 +19,8 @@ pub struct Classe {
 
 #[derive(Debug)]
 pub struct Relacio {
-    pub cs: Vec<(Rc<Classe>, Multiplicitat, Multiplicitat)>, // Classe, multiplicitat
-    pub associativa: Option<Rc<Classe>>,
+    pub cs: Vec<(ClassPtr, Multiplicitat, Multiplicitat)>, // Classe, multiplicitat
+    pub associativa: Option<Rc<RefCell<Classe>>>,
 }
 
 #[derive(Clone, Debug)]
@@ -30,7 +32,7 @@ pub struct Attribute {
 }
 
 pub struct World {
-    pub classes: Vec<Rc<Classe>>,
+    pub classes: Vec<ClassPtr>,
     pub rels: Vec<Relacio>,
     pub style: Style,
 }
@@ -42,7 +44,7 @@ pub struct Style {
 
 // makes main be too busy
 pub fn example(font: Font, fontsize: f32) -> World {
-    let a = Rc::new(Classe {
+    let a = Rc::new(RefCell::new(Classe {
         nom: String::from("A"),
         attribs: vec![
             Attribute {
@@ -58,10 +60,10 @@ pub fn example(font: Font, fontsize: f32) -> World {
                 multmax: Some(3),
             },
         ],
-        pos: Vector2 { x: 10.0, y: 200.0 },
+        pos: Vector2 { x: 100.0, y: 200.0 },
         superclass: None,
-    });
-    let b = Rc::new(Classe {
+    }));
+    let b = Rc::new(RefCell::new(Classe {
         nom: String::from("B"),
         attribs: vec![
             Attribute {
@@ -79,8 +81,8 @@ pub fn example(font: Font, fontsize: f32) -> World {
         ],
         pos: Vector2 { x: 100.0, y: 200.0 },
         superclass: None,
-    });
-    let c = Rc::new(Classe {
+    }));
+    let c = Rc::new(RefCell::new(Classe {
         nom: String::from("C"),
         attribs: vec![
             Attribute {
@@ -98,7 +100,7 @@ pub fn example(font: Font, fontsize: f32) -> World {
         ],
         pos: Vector2 { x: 100.0, y: 500.0 },
         superclass: None,
-    });
+    }));
 
     World {
         classes: vec![a.clone()],

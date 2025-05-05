@@ -25,7 +25,7 @@ fn main() {
     let mut screen_width = 1000;
     let mut screen_height = 700;
 
-    let world = example(font, 22.0);
+    let mut w = example(font, 22.0);
 
     while !rl.window_should_close() {
         let new_height = rl.get_screen_height();
@@ -43,8 +43,12 @@ fn main() {
 
         d.clear_background(Color::RAYWHITE);
 
-        for class in &world.classes {
-            draw_class(&mut d, &class, &world.style);
+        for class in &mut w.classes {
+            draw_class(&mut d, &class.borrow(), &w.style);
+            //class.superclass.is_some_and(|superr| draw_subclass_relation(&superr, &class, &w.style));
+
+            class.borrow_mut().pos.x *= new_width as f32 / screen_width as f32;
+            class.borrow_mut().pos.y *= new_height as f32 / screen_height as f32;
         }
 
         for x in (0..=screen_width).step_by(CELL_SIZE) {
