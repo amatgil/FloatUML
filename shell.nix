@@ -24,6 +24,15 @@ let
     clang-tools
     valgrind
     gdb
+
+    rust-analyzer
+    rustfmt
+    mold
+    rust-bin.stable.latest.default
+
+    pkg-config
+    libGL
+    alsa-lib
   ];
 in
 pkgs.mkShell {

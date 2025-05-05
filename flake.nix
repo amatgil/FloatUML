@@ -2,13 +2,16 @@
   description = "A UML designer";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
   outputs =
-    { self, nixpkgs }:
+    { self, nixpkgs, rust-overlay }:
     let
       supportedSystems = [ "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgs = (import nixpkgs { system = "x86_64-linux"; });
+      overlays = [(import rust-overlay) ];
+      pkgs = (import nixpkgs { system = "x86_64-linux"; inherit overlays; });
+
     in
     {
       devShells = forAllSystems (system: {
