@@ -122,45 +122,73 @@ int32_t parse(struct StrSlice *a, struct World *w) {
                                 mul_lower_int, mul_higher_int);
             }
             umlrs_append(&parsed_relacions, parsed_rel);
-        }
+        } else if (umls_cmp_cstr(&word, "super")) {
+            struct StrSlice super = umlss_readw(&b);
+            if (umls_cmp_cstr(&super, ""))
+                return -1;
+            struct StrSlice sub = umlss_readw(&b);
+            if (umls_cmp_cstr(&super, ""))
+                return -1;
 
-        for (int i = 0; i < parsed_classes.len; ++i) {
-            struct Classe parsed_class = parsed_classes.cs[i];
-            int j = search_class(&w->classes, parsed_class.nom);
-            if (j == -1) {
-                umlc_append(&w->classes, parsed_class);
-            } else {
-                parsed_class.pos = w->classes.cs[j].pos;
-                w->classes.cs[j] = parsed_class;
-            }
-        }
-        // TODO: iterate over world, delete if doesn't exist in parsed
+            int super_i = search_class(&parsed_classes, super.text);
+            int sub_i = search_class(&parsed_classes, sub.text);
+            if (super_i < 0 || sub_i < 0)
+                return -1;
 
-        // Move pointers from inner (towards parsed_relations) to outer (towards
-        // world)
-        for (int i = 0; i < parsed_relacions.len; ++i) {
-            // the associativa of the relacio
-            if (parsed_relacions.rs[i].associativa != NULL) {
-                int k = search_class(&w->classes,
-                                     parsed_relacions.rs[i].associativa->nom);
-                assert(k >= 0);
-                parsed_relacions.rs[i].associativa = &w->classes.cs[k];
-            }
-
-            // All the classes that form la relacio
-            for (int j = 0; j < parsed_relacions.rs[i].len; ++j) {
-                struct Classe *class_in_rel = parsed_relacions.rs[i].cs[j];
-                int k = search_class(&w->classes, class_in_rel->nom);
-                assert(k >= 0);
-                parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
-            }
-        }
-        w->relacions = parsed_relacions; // This is 100% a memory leak, we're
-                                         // leaking the previous relacions
-
-        // TODO: instead of memory leaking above, drop the Relacions safely
-
-        // TODO: free parsed_{classes, attributes}
+            parsed_classes.cs[sub_i].superclasse = &parsed_classes.cs[super_i];
+        } else
+            return -1;
     }
+
+    // code classes -> diagram classes
+    for (int i = 0; i < parsed_classes.len; ++i) {
+        struct Classe parsed_class = parsed_classes.cs[i];
+
+        int j = search_class(&w->classes, parsed_class.nom);
+        if (j == -1) {
+            umlc_append(&w->classes, parsed_class);
+        } else {
+            parsed_class.pos = w->classes.cs[j].pos;
+            w->classes.cs[j] = parsed_class;
+        }
+    }
+
+    // update superclasses
+    for (int i = 0; i < w->classes.len; ++i) {
+        if (w->classes.cs[i].superclasse != NULL) {
+            int j =
+                search_class(&w->classes, w->classes.cs[i].superclasse->nom);
+            w->classes.cs[i].superclasse = &w->classes.cs[j];
+        }
+    }
+
+    // TODO: iterate over world, delete if doesn't exist in parsed
+
+    // Move pointers from inner (towards parsed_relations) to outer (towards
+    // world)
+    for (int i = 0; i < parsed_relacions.len; ++i) {
+        // the associativa of the relacio
+        if (parsed_relacions.rs[i].associativa != NULL) {
+            int k = search_class(&w->classes,
+                                 parsed_relacions.rs[i].associativa->nom);
+            assert(k >= 0);
+            parsed_relacions.rs[i].associativa = &w->classes.cs[k];
+        }
+
+        // All the classes that form la relacio
+        for (int j = 0; j < parsed_relacions.rs[i].len; ++j) {
+            struct Classe *class_in_rel = parsed_relacions.rs[i].cs[j];
+            int k = search_class(&w->classes, class_in_rel->nom);
+            assert(k >= 0);
+            parsed_relacions.rs[i].cs[j] = &w->classes.cs[k];
+        }
+    }
+    w->relacions = parsed_relacions; // This is 100% a memory leak, we're
+                                     // leaking the previous relacions
+
+    // TODO: instead of memory leaking above, drop the Relacions safely
+
+    // TODO: free parsed_{classes, attributes}
+
     return 0;
 }
