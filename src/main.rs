@@ -4,7 +4,11 @@ use std::{
     rc::Rc,
 };
 
-use floatuml::{drawing::draw_class, utils::rect_of, *};
+use floatuml::{
+    drawing::{draw_class, draw_relacio},
+    utils::rect_of,
+    *,
+};
 use raylib::{
     ffi::{SetConfigFlags, SetTextureFilter},
     prelude::*,
@@ -55,7 +59,7 @@ fn main() {
             //class.superclass.is_some_and(|superr| draw_subclass_relation(&superr, &class, &w.style)); // TODO: impl
         }
         for relation in &w.rels {
-            //draw_relations(&mut d, relation, &w.style;); // TODO: impl
+            draw_relacio(&mut d, relation, &w.style); // TODO: impl
         }
         for x in (0..=screen_width).step_by(CELL_SIZE) {
             d.draw_line(x, 0, x, screen_height, Color::LIGHTGRAY);

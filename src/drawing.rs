@@ -119,8 +119,8 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
     for (component, multlower, multhigher) in &relacio.cs {
         let classe = component.deref().borrow_mut();
         let (arect, _, _, _) = rect_of(&classe, style);
-        let p1 = int_seg_rect(rect_center(arect), punt_mig, arect);
-        d.draw_line_ex(p1, punt_mig, 3.0, Color::BLACK);
+        let mut pt1 = int_seg_rect(rect_center(arect), punt_mig, arect);
+        d.draw_line_ex(pt1, punt_mig, 3.0, Color::BLACK);
         let mult_text = format!(
             "{}..{}",
             multlower.map_or(String::from("*"), |m| m.to_string()),
@@ -128,58 +128,56 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
         );
         use raylib::prelude::*;
 
-        fn adjust_point(pt1: &mut Vector2, arect: &Rectangle, punt_mig: Vector2, buff: &str) {
-            if pt1.x == arect.x || pt1.x == arect.x + arect.width {
-                if pt1.x == arect.x {
-                    if (Vector2 { x: 0.0, y: 1.0 }).angle_to(Vector2 {
-                        x: punt_mig.x - pt1.x,
-                        y: punt_mig.y - pt1.y,
-                    }) > std::f32::consts::PI / 2.0
-                    {
-                        pt1.y += 10.0;
-                    } else {
-                        pt1.y -= 20.0;
-                    }
-                    pt1.x -= (buff.len() as f32) * 15.0;
-                } else {
-                    if (Vector2 { x: 0.0, y: -1.0 }).angle_to(Vector2 {
-                        x: punt_mig.x - pt1.x,
-                        y: punt_mig.y - pt1.y,
-                    }) > std::f32::consts::PI / 2.0
-                    {
-                        pt1.y += 10.0;
-                    } else {
-                        pt1.y -= 20.0;
-                    }
-                    pt1.x += 10.0;
-                }
-            } else if pt1.y == arect.y || pt1.y == arect.y + arect.height {
-                if pt1.y == arect.y {
-                    if (Vector2 { x: 1.0, y: 0.0 }).angle_to(Vector2 {
-                        x: punt_mig.x - pt1.x,
-                        y: punt_mig.y - pt1.y,
-                    }) > std::f32::consts::PI / 2.0
-                    {
-                        pt1.x += 30.0;
-                    } else {
-                        pt1.x -= 30.0;
-                    }
-                    pt1.y -= 20.0;
-                } else {
-                    if (Vector2 { x: -1.0, y: 0.0 }).angle_to(Vector2 {
-                        x: punt_mig.x - pt1.x,
-                        y: punt_mig.y - pt1.y,
-                    }) > std::f32::consts::PI / 2.0
-                    {
-                        pt1.x += 30.0;
-                    } else {
-                        pt1.x -= 30.0;
-                    }
+        if pt1.x == arect.x || pt1.x == arect.x + arect.width {
+            if pt1.x == arect.x {
+                if (Vector2 { x: 0.0, y: 1.0 }).angle_to(Vector2 {
+                    x: punt_mig.x - pt1.x,
+                    y: punt_mig.y - pt1.y,
+                }) > std::f32::consts::PI / 2.0
+                {
                     pt1.y += 10.0;
+                } else {
+                    pt1.y -= 20.0;
                 }
+                pt1.x -= (mult_text.len() as f32) * 15.0;
+            } else {
+                if (Vector2 { x: 0.0, y: -1.0 }).angle_to(Vector2 {
+                    x: punt_mig.x - pt1.x,
+                    y: punt_mig.y - pt1.y,
+                }) > std::f32::consts::PI / 2.0
+                {
+                    pt1.y += 10.0;
+                } else {
+                    pt1.y -= 20.0;
+                }
+                pt1.x += 10.0;
+            }
+        } else if pt1.y == arect.y || pt1.y == arect.y + arect.height {
+            if pt1.y == arect.y {
+                if (Vector2 { x: 1.0, y: 0.0 }).angle_to(Vector2 {
+                    x: punt_mig.x - pt1.x,
+                    y: punt_mig.y - pt1.y,
+                }) > std::f32::consts::PI / 2.0
+                {
+                    pt1.x += 30.0;
+                } else {
+                    pt1.x -= 30.0;
+                }
+                pt1.y -= 20.0;
+            } else {
+                if (Vector2 { x: -1.0, y: 0.0 }).angle_to(Vector2 {
+                    x: punt_mig.x - pt1.x,
+                    y: punt_mig.y - pt1.y,
+                }) > std::f32::consts::PI / 2.0
+                {
+                    pt1.x += 30.0;
+                } else {
+                    pt1.x -= 30.0;
+                }
+                pt1.y += 10.0;
             }
         }
 
-        d.draw_text_ex(&style.font, &mult_text, p1, 20.0, 0.0, Color::BLACK);
+        d.draw_text_ex(&style.font, &mult_text, pt1, 20.0, 0.0, Color::BLACK);
     }
 }
