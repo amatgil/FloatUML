@@ -3,7 +3,7 @@ use raylib::prelude::*;
 use crate::*;
 
 /// Returns ([x, y, width, height], m_colon, marge, max)
-pub fn rect_of(c: &Classe, style: &Style) -> ([f32; 4], Vector2, i32, f32) {
+pub fn rect_of(c: &Classe, style: &Style) -> (Rectangle, Vector2, i32, f32) {
     let mut max = style.font.measure_text(&c.nom, style.fontsize, 0.0).x * 1.33;
     let m_colon = style.font.measure_text(" : ", style.fontsize, 0.0);
     let marge = (m_colon.y / 3.0) as i32;
@@ -24,5 +24,27 @@ pub fn rect_of(c: &Classe, style: &Style) -> ([f32; 4], Vector2, i32, f32) {
         }
     }
 
-    ([c.pos.x, c.pos.y, width, height], m_colon, marge, max)
+    (
+        Rectangle {
+            x: c.pos.x,
+            y: c.pos.y,
+            width,
+            height,
+        },
+        m_colon,
+        marge,
+        max,
+    )
+}
+
+pub fn calcul_punt_mig(r: &Relacio, style: &Style) -> Vector2 {
+    todo!()
+}
+
+pub fn int_seg_rect(start: Vector2, punt_mig: Vector2, rect: Rectangle) -> Vector2 {
+    todo!()
+}
+
+pub fn rect_center(rect: Rectangle) -> Vector2 {
+    todo!()
 }

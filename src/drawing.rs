@@ -1,11 +1,23 @@
+use std::ops::Deref;
+
 use crate::*;
 
-use self::utils::rect_of;
+use self::utils::*;
 
 pub fn draw_class(d: &mut RaylibDrawHandle, c: &Classe, style: &Style) {
     d.clear_background(Color::WHITE);
 
-    let ([x, y, width, height], m_colon, marge, max) = rect_of(c, style);
+    let (
+        Rectangle {
+            x,
+            y,
+            width,
+            height,
+        },
+        m_colon,
+        marge,
+        max,
+    ) = rect_of(c, style);
     d.draw_rectangle(
         x as i32,
         y as i32,
@@ -100,6 +112,74 @@ pub fn draw_class(d: &mut RaylibDrawHandle, c: &Classe, style: &Style) {
         y: c.pos.y,
     };
     d.draw_line_ex(p_i, p_f, border_width as f32, Color::BLACK); // vertical 2
+}
 
-    // return (Rectangle){c.pos.x, c.pos.y, max, m_colon.y * (nattrs + 1)};
+pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) {
+    let punt_mig = calcul_punt_mig(relacio, style);
+    for (component, multlower, multhigher) in &relacio.cs {
+        let classe = component.deref().borrow_mut();
+        let (arect, _, _, _) = rect_of(&classe, style);
+        let p1 = int_seg_rect(rect_center(arect), punt_mig, arect);
+        d.draw_line_ex(p1, punt_mig, 3.0, Color::BLACK);
+        let mult_text = format!(
+            "{}..{}",
+            multlower.map_or(String::from("*"), |m| m.to_string()),
+            multhigher.map_or(String::from("*"), |m| m.to_string())
+        );
+        use raylib::prelude::*;
+
+        fn adjust_point(pt1: &mut Vector2, arect: &Rectangle, punt_mig: Vector2, buff: &str) {
+            if pt1.x == arect.x || pt1.x == arect.x + arect.width {
+                if pt1.x == arect.x {
+                    if (Vector2 { x: 0.0, y: 1.0 }).angle_to(Vector2 {
+                        x: punt_mig.x - pt1.x,
+                        y: punt_mig.y - pt1.y,
+                    }) > std::f32::consts::PI / 2.0
+                    {
+                        pt1.y += 10.0;
+                    } else {
+                        pt1.y -= 20.0;
+                    }
+                    pt1.x -= (buff.len() as f32) * 15.0;
+                } else {
+                    if (Vector2 { x: 0.0, y: -1.0 }).angle_to(Vector2 {
+                        x: punt_mig.x - pt1.x,
+                        y: punt_mig.y - pt1.y,
+                    }) > std::f32::consts::PI / 2.0
+                    {
+                        pt1.y += 10.0;
+                    } else {
+                        pt1.y -= 20.0;
+                    }
+                    pt1.x += 10.0;
+                }
+            } else if pt1.y == arect.y || pt1.y == arect.y + arect.height {
+                if pt1.y == arect.y {
+                    if (Vector2 { x: 1.0, y: 0.0 }).angle_to(Vector2 {
+                        x: punt_mig.x - pt1.x,
+                        y: punt_mig.y - pt1.y,
+                    }) > std::f32::consts::PI / 2.0
+                    {
+                        pt1.x += 30.0;
+                    } else {
+                        pt1.x -= 30.0;
+                    }
+                    pt1.y -= 20.0;
+                } else {
+                    if (Vector2 { x: -1.0, y: 0.0 }).angle_to(Vector2 {
+                        x: punt_mig.x - pt1.x,
+                        y: punt_mig.y - pt1.y,
+                    }) > std::f32::consts::PI / 2.0
+                    {
+                        pt1.x += 30.0;
+                    } else {
+                        pt1.x -= 30.0;
+                    }
+                    pt1.y += 10.0;
+                }
+            }
+        }
+
+        d.draw_text_ex(&style.font, &mult_text, p1, 20.0, 0.0, Color::BLACK);
+    }
 }

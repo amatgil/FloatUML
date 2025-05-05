@@ -73,7 +73,15 @@ fn main() {
                     let mpos = rl.get_mouse_position();
                     for class_p in &w.classes {
                         let class = class_p.deref().borrow();
-                        let ([x, y, width, height], _, _, _) = rect_of(&class, &w.style);
+                        let (
+                            Rectangle {
+                                x,
+                                y,
+                                width,
+                                height,
+                            },
+                            ..,
+                        ) = rect_of(&class, &w.style);
 
                         let points = [
                             Vector2::new(x, y),
