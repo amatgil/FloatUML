@@ -1,47 +1,30 @@
 use crate::*;
 
+use self::utils::rect_of;
+
 pub fn draw_class(d: &mut RaylibDrawHandle, c: &Classe, style: &Style) {
     d.clear_background(Color::WHITE);
 
-    let mut max = style.font.measure_text(&c.nom, style.fontsize, 0.0).x;
-
-    let m_colon = style.font.measure_text(" : ", style.fontsize, 0.0);
-    let marge = (m_colon.y / 3.0) as i32;
-    let mut size_rect_width: f32 = style.font.measure_text(&c.nom, style.fontsize, 0.0).x;
-    let mut size_rect_height = (c.attribs.len() + 1) as f32 * m_colon.y + marge as f32;
-
-    for i in 0..c.attribs.len() {
-        let m_nom = style
-            .font
-            .measure_text(&c.attribs[i].nom, style.fontsize, 0.0);
-        let m_typ = style
-            .font
-            .measure_text(&c.attribs[i].tipus, style.fontsize, 0.0);
-
-        if m_nom.x + m_typ.x + m_colon.x > max {
-            max = m_nom.x + m_typ.x + m_colon.x * 1.33;
-            size_rect_width = m_nom.x + m_typ.x + m_colon.x * 1.33;
-        }
-    }
-
+    let ([x, y, width, height], m_colon, marge, max) = rect_of(c, style);
     d.draw_rectangle(
-        c.pos.x as i32,
-        c.pos.y as i32,
-        size_rect_width as i32,
-        size_rect_height as i32,
+        x as i32,
+        y as i32,
+        width as i32,
+        height as i32,
         Color::WHITE,
     );
-    /*d.draw_text(
+
+    d.draw_text_ex(
         &style.font,
         &c.nom,
         Vector2 {
             x: c.pos.x + marge as f32 / 2.0,
             y: c.pos.y + marge as f32 / 2.0,
         },
-        style.font_size,
+        style.fontsize,
         0.0,
         Color::BLACK,
-    );*/
+    );
 
     for (i, attrib) in c.attribs.iter().enumerate() {
         let m_nom = style.font.measure_text(&attrib.nom, style.fontsize, 0.0);

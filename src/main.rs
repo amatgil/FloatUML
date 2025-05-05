@@ -71,9 +71,19 @@ fn main() {
                 Some(ref cl) => cl.deref().borrow_mut().pos += rl.get_mouse_delta(),
                 None => {
                     let mpos = rl.get_mouse_position();
-                    for class in &w.classes {
-                        if check_collision_point_poly(mpos, &rect_of(class.clone())) {
-                            st.currently_held = Some(class.clone());
+                    for class_p in &w.classes {
+                        let class = class_p.deref().borrow();
+                        let ([x, y, width, height], _, _, _) = rect_of(&class, &w.style);
+
+                        let points = [
+                            Vector2::new(x, y),
+                            Vector2::new(x, y) + Vector2::new(0.0, height),
+                            Vector2::new(x, y) + Vector2::new(width, height),
+                            Vector2::new(x, y) + Vector2::new(width, 0.0),
+                        ];
+
+                        if check_collision_point_poly(mpos, &points) {
+                            st.currently_held = Some(class_p.clone());
                         }
                     }
                 }
