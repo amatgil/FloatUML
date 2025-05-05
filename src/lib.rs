@@ -4,6 +4,8 @@ use raylib::prelude::*;
 use std::rc::Rc;
 
 type Multiplicitat = Option<u32>;
+pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 4.0;
+pub const CELL_SIZE: usize = 32;
 
 #[derive(Debug)] // No clone expressament
 pub struct Classe {
@@ -36,4 +38,74 @@ pub struct World {
 pub struct Style {
     pub font: Font,
     pub fontsize: f32,
+}
+
+// makes main be too busy
+pub fn example(font: Font, fontsize: f32) -> World {
+    let a = Rc::new(Classe {
+        nom: String::from("A"),
+        attribs: vec![
+            Attribute {
+                nom: String::from("Tal"),
+                tipus: String::from("Qual"),
+                multmin: None,
+                multmax: Some(7),
+            },
+            Attribute {
+                nom: String::from("Altre"),
+                tipus: String::from("Definitivament"),
+                multmin: Some(2),
+                multmax: Some(3),
+            },
+        ],
+        pos: Vector2 { x: 10.0, y: 200.0 },
+        superclass: None,
+    });
+    let b = Rc::new(Classe {
+        nom: String::from("B"),
+        attribs: vec![
+            Attribute {
+                nom: String::from("AAAA"),
+                tipus: String::from("BBB"),
+                multmin: None,
+                multmax: Some(7),
+            },
+            Attribute {
+                nom: String::from("CCCC"),
+                tipus: String::from("DDDDDD"),
+                multmin: Some(2),
+                multmax: Some(3),
+            },
+        ],
+        pos: Vector2 { x: 100.0, y: 200.0 },
+        superclass: None,
+    });
+    let c = Rc::new(Classe {
+        nom: String::from("C"),
+        attribs: vec![
+            Attribute {
+                nom: String::from("EEEEE"),
+                tipus: String::from("FFFFFF"),
+                multmin: None,
+                multmax: Some(7),
+            },
+            Attribute {
+                nom: String::from("GGGG"),
+                tipus: String::from("HHHH"),
+                multmin: Some(2),
+                multmax: Some(3),
+            },
+        ],
+        pos: Vector2 { x: 100.0, y: 500.0 },
+        superclass: None,
+    });
+
+    World {
+        classes: vec![a.clone()],
+        rels: vec![Relacio {
+            cs: vec![(a, None, None), (b, Some(2), Some(3))],
+            associativa: Some(c),
+        }],
+        style: Style { font, fontsize },
+    }
 }

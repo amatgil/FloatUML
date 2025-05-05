@@ -1,5 +1,4 @@
 use crate::*;
-use raylib::*;
 
 pub fn draw_class(d: &mut RaylibDrawHandle, c: &Classe, style: &Style) {
     d.clear_background(Color::WHITE);
