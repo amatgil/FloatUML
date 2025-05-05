@@ -118,11 +118,11 @@ int main(void) {
             DrawLine(0, y, screenWidth, y, LIGHTGRAY);
         }
 
-        /* for (int i = 0; i < w.classes.len; ++i) { */
-        /*     if (w.classes.cs[i].superclasse != NULL) */
-        /*         draw_subclass_relation(*w.classes.cs[i].superclasse, */
-        /*                                w.classes.cs[i], &w.style); */
-        /* } */
+        for (int i = 0; i < w.classes.len; ++i) {
+            if (w.classes.cs[i].superclasse != NULL)
+                draw_subclass_relation(*w.classes.cs[i].superclasse,
+                                       w.classes.cs[i], &w.style);
+        }
 
         for (int i = 0; i < w.classes.len; ++i) {
             w.classes.cs[i].pos.x =
