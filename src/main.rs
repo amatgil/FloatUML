@@ -1,9 +1,12 @@
 use std::rc::Rc;
 
-use floatuml::*;
-use raylib::prelude::*;
+use floatuml::{drawing::draw_class, *};
+use raylib::{
+    ffi::{SetConfigFlags, SetTextureFilter},
+    prelude::*,
+};
 
-fn example(font: Font, fontsize: u16) -> World {
+fn example(font: Font, fontsize: f32) -> World {
     let a = Rc::new(Classe {
         nom: String::from("A"),
         attribs: vec![
@@ -63,7 +66,7 @@ fn example(font: Font, fontsize: u16) -> World {
     });
 
     World {
-        classes: vec![a.clone(), b.clone(), c.clone()],
+        classes: vec![a.clone()],
         rels: vec![Relacio {
             cs: vec![(a, None, None), (b, Some(2), Some(3))],
             associativa: Some(c),
@@ -77,12 +80,25 @@ struct State {
 }
 
 fn main() {
-    let (mut rl, thread) = raylib::init().size(640, 480).title("Hello, World").build();
+    unsafe { SetConfigFlags(ConfigFlags::FLAG_MSAA_4X_HINT as u32) };
+    unsafe { SetConfigFlags(ConfigFlags::FLAG_WINDOW_RESIZABLE as u32) };
+
+    let (mut rl, thread) = raylib::init().size(640, 480).title("floatUML").build();
+
+    let font = rl
+        .load_font(&thread, "external/Consolas/consolas.ttf")
+        .expect("No font?");
+    //font.texture.set_texture_filter(thread);
+
+    let world = example(font, 22.0);
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
 
         d.clear_background(Color::WHITE);
-        d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
+
+        for class in &world.classes {
+            draw_class(&mut d, &class, &world.style);
+        }
     }
 }
