@@ -43,6 +43,7 @@ pub struct Style {
     pub fontsize: f32,
 }
 
+#[derive(Debug)]
 pub struct Textarea {
     pub text: String,
     pub cursor_pos: u32,
@@ -51,20 +52,18 @@ pub struct Textarea {
 
 impl Textarea {
     pub fn backspace(&mut self) {
-        todo!()
+        if self.cursor_pos > 0 {
+            self.text.remove(self.cursor_pos as usize - 1);
+            self.cursor_pos -= 1;
+        }
     }
     pub fn pull_events(&mut self, rl: &mut RaylibHandle) -> bool {
         let mut update = false;
         while let Some(c) = rl.get_char_pressed() {
-            dbg!(c);
             update = true;
-            dbg!(&self.text);
             self.text.push(c);
-            dbg!(&self.text);
             self.cursor_pos += 1;
-            dbg!(&self.text);
         }
-        dbg!(&self.text);
 
         while let Some(k) = rl.get_key_pressed() {
             match k {
