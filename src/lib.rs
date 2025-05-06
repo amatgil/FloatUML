@@ -1,4 +1,5 @@
 pub mod drawing;
+pub mod parser;
 pub mod utils;
 
 use raylib::prelude::*;
