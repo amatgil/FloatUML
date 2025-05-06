@@ -105,10 +105,20 @@ pub fn example(font: Font, fontsize: f32) -> World {
 
     World {
         classes: vec![a.clone(), b.clone(), c.clone()],
-        rels: vec![Relacio {
-            cs: vec![(a, None, None), (b, Some(2), Some(3))],
-            associativa: Some(c),
-        }],
+        rels: vec![
+            Relacio {
+                cs: vec![
+                    (a.clone(), None, None),
+                    (b.clone(), Some(2), Some(3)),
+                    (c.clone(), Some(20), Some(30)),
+                ],
+                associativa: None,
+            },
+            Relacio {
+                cs: vec![(a.clone(), None, None), (b.clone(), None, None)],
+                associativa: None,
+            },
+        ],
         style: Style { font, fontsize },
     }
 }
