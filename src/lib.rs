@@ -11,7 +11,7 @@ pub type ClassPtr = Rc<RefCell<Classe>>;
 pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 4.0;
 pub const CELL_SIZE: usize = 32;
 
-#[derive(Debug)] // No clone expressament
+#[derive(Debug, PartialEq)] // No clone expressament
 pub struct Classe {
     pub nom: String,
     pub attribs: Vec<Attribute>,
@@ -25,7 +25,7 @@ pub struct Relacio {
     pub associativa: Option<Rc<RefCell<Classe>>>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Attribute {
     pub nom: String,
     pub tipus: String,

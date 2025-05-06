@@ -11,7 +11,7 @@ type ParserRes<'a, T> = Option<(T, &'a str)>;
 fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
     let input = input.trim();
     match input.strip_prefix(c) {
-        Some(rest) => Some((&input[0..c.len_utf8()], rest)),
+        Some(rest) => Some((&input[0..c.len_utf8()].trim(), rest.trim())),
         None => None,
     }
 }
@@ -19,7 +19,7 @@ fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
 fn parse_word<'a>(input: &'a str, word: &'a str) -> ParserRes<'a, &'a str> {
     let input = input.trim();
     match input.strip_prefix(word) {
-        Some(rest) => Some((&input[0..word.bytes().len()], rest.trim())),
+        Some(rest) => Some((&input[0..word.bytes().len()].trim(), rest.trim())),
         None => None,
     }
 }
@@ -38,15 +38,15 @@ where
 pub fn parse_classe(input: &str) -> ParserRes<Classe> {
     let input = input.trim();
     let (_classe, input) = parse_word(input, "classe")?;
-    let (_, input) = parse_word(input, "{")?;
-    let (nom, mut input) = parse_until(input, |c| c == ' ')?;
+    let (nom, input) = parse_until(input, |c| c == ' ')?;
+    let (_, mut input) = parse_word(input, "{")?;
 
     let mut attribs = vec![];
     while let Some((at, inputt)) = parse_attrib(input) {
         attribs.push(at);
         input = inputt;
     }
-    let (_, _input) = parse_word(input, "}")?;
+    let (_, input) = parse_word(input, "}")?;
 
     Some((
         Classe {
@@ -62,16 +62,17 @@ pub fn parse_classe(input: &str) -> ParserRes<Classe> {
 pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
     let input = input.trim();
     let (nom, input) = parse_until(input, |c| c == ' ' || c == ':')?;
+    let (_colon, input) = parse_letter(input, ':')?;
     let (tipus, input) = parse_until(input, |c| c == ' ')?;
-    let (multmin, input) = parse_int(input)?;
-    let (multmax, input) = parse_int(input)?;
+    //let (multmin, input) = parse_int(input)?;
+    //let (multmax, input) = parse_int(input)?;
 
     Some((
         Attribute {
             nom: nom.to_string(),
             tipus: tipus.to_string(),
-            multmin: u32::try_from(multmin).ok(),
-            multmax: u32::try_from(multmax).ok(),
+            multmin: None, //u32::try_from(multmin).ok(),
+            multmax: None, //u32::try_from(multmax).ok(),
         },
         input,
     ))
@@ -94,6 +95,34 @@ fn parse_nat(input: &str) -> ParserRes<u32> {
     Some((nstr.parse().ok()?, input))
 }
 
+#[test]
+fn class_test() {
+    let input = "classe Name { some: Thing whatever : Else }";
+    let (classe, input) = parse_classe(input).unwrap();
+    assert_eq!(input, "");
+    assert_eq!(
+        classe,
+        Classe {
+            nom: "Name".to_string(),
+            attribs: vec![
+                Attribute {
+                    nom: "some".to_string(),
+                    tipus: "Thing".to_string(),
+                    multmin: None,
+                    multmax: None
+                },
+                Attribute {
+                    nom: "whatever".to_string(),
+                    tipus: "Else".to_string(),
+                    multmin: None,
+                    multmax: None
+                }
+            ],
+            pos: Vector2 { x: 0.0, y: 0.0 },
+            superclass: None
+        }
+    );
+}
 #[test]
 fn letter_test() {
     let input = "abcde";
