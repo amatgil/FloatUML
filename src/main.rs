@@ -69,6 +69,23 @@ fn main() {
         for relation in &w.rels {
             draw_relacio(&mut d, relation, &w.style); // TODO: impl
         }
+
+        if (st.textbox_up) {
+        } else {
+            let text = "F10 to toggle terminal";
+            d.draw_text_ex(
+                &w.style.font,
+                text,
+                Vector2 {
+                    x: screen_width as f32
+                        - w.style.font.measure_text(text, w.style.fontsize, 0.0).x,
+                    y: screen_height as f32 - w.style.fontsize,
+                },
+                w.style.fontsize,
+                0.0,
+                Color::BLACK,
+            );
+        }
         drop(d);
 
         // Mouse/dragging
@@ -106,7 +123,11 @@ fn main() {
             st.currently_held = None;
         }
 
-        // Update vals
+        if rl.is_key_pressed(KeyboardKey::KEY_F10) {
+            st.textbox_up = !st.textbox_up;
+        }
+
+        // For when resize
         for class in &w.classes {
             class.deref().borrow_mut().pos *= new_width as f32 / screen_width as f32;
             class.deref().borrow_mut().pos.y *= new_height as f32 / screen_height as f32;
