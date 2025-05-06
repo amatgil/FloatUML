@@ -204,21 +204,12 @@ pub fn draw_textarea(
         d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
     }
 
+    let m = style.font.measure_text("-", style.fontsize, 0.0);
     for (i, c) in text.chars().enumerate() {
         let s = &c.to_string();
-        let m = style.font.measure_text(s, style.fontsize, 0.0);
-        if i as u32 + 1 == *cursor_pos {
-            d.draw_text_ex(
-                &style.font,
-                "_",
-                pos + Vector2 { x: m.x, y: 0.0 },
-                style.fontsize,
-                0.0,
-                Color::BLACK,
-            );
-        }
+
         if c == '\n' {
-            pos.y += m.y; // TODO: magic number?
+            pos.y += style.fontsize;
             pos.x = ipos.x;
         } else if c == '\t' {
             pos.x += m.x * 4.0;
@@ -227,4 +218,5 @@ pub fn draw_textarea(
             pos.x += m.x;
         }
     }
+    d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
 }
