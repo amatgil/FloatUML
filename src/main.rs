@@ -1,11 +1,7 @@
-use std::{
-    borrow::BorrowMut,
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::ops::Deref;
 
 use floatuml::{
-    drawing::{draw_class, draw_relacio},
+    drawing::{draw_class, draw_relacio, draw_textarea},
     utils::rect_of,
     *,
 };
@@ -39,18 +35,24 @@ fn main() {
         currently_held: None,
         textbox_up: false,
     };
+    let mut tarea = Textarea {
+        area: Rectangle {
+            x: 0.0,
+            y: 10.0,
+            width: 0.0,
+            height: screen_height as f32,
+        },
+        text: String::new(),
+        cursor_pos: 0,
+    };
 
     while !rl.window_should_close() {
         let new_height = rl.get_screen_height();
         let new_width = rl.get_screen_width();
 
-        let mut width_textarea = screen_width as f32 / PERCENTATGE_MIDA_TEXTBOX;
-        let textarea = Rectangle {
-            x: screen_width as f32 - width_textarea,
-            y: 10.0,
-            width: width_textarea,
-            height: screen_height as f32,
-        };
+        let width_textarea = screen_width as f32 / PERCENTATGE_MIDA_TEXTBOX;
+        tarea.area.x = screen_width as f32 - width_textarea;
+        tarea.area.width = width_textarea;
 
         // Draw
         let mut d = rl.begin_drawing(&thread);
@@ -70,7 +72,14 @@ fn main() {
             draw_relacio(&mut d, relation, &w.style); // TODO: impl
         }
 
-        if (st.textbox_up) {
+        if st.textbox_up {
+            // TODO: This will make the terminal be one frame off, which is not ideal
+            draw_textarea(&mut d, &tarea, &w.style);
+            drop(d);
+            let update_occurred = tarea.pull_events(&mut rl);
+            if update_occurred {
+                //update_world(&tarea, &mut w);
+            }
         } else {
             let text = "F10 to toggle terminal";
             d.draw_text_ex(
@@ -85,8 +94,8 @@ fn main() {
                 0.0,
                 Color::BLACK,
             );
+            drop(d);
         }
-        drop(d);
 
         // Mouse/dragging
         if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {

@@ -184,3 +184,40 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
         d.draw_text_ex(&style.font, &mult_text, pt1, 20.0, 0.0, Color::BLACK);
     }
 }
+
+pub fn draw_textarea(
+    d: &mut RaylibDrawHandle,
+    Textarea {
+        text,
+        cursor_pos,
+        area,
+    }: &Textarea,
+    style: &Style,
+) {
+    let ipos = Vector2 {
+        x: area.x,
+        y: area.y,
+    };
+    let mut pos = ipos;
+
+    if text.is_empty() {
+        d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
+    }
+
+    for (i, c) in text.chars().enumerate() {
+        if i == *cursor_pos as usize {
+            d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
+        }
+        let s = &c.to_string();
+        let m = style.font.measure_text(s, style.fontsize, 0.0);
+        if c == '\n' {
+            pos.y += m.y + 4.0; // TODO: magic number?
+            pos.x = ipos.x;
+        } else if c == '\t' {
+            pos.x += m.x * 4.0; // TODO: Same magic number? Or is it coincidental
+        } else {
+            d.draw_text_codepoints(&style.font, s, pos, style.fontsize, 0.0, Color::BLACK);
+            pos.x += m.x;
+        }
+    }
+}

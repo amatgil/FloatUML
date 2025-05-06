@@ -43,6 +43,50 @@ pub struct Style {
     pub fontsize: f32,
 }
 
+pub struct Textarea {
+    pub text: String,
+    pub cursor_pos: u32,
+    pub area: Rectangle,
+}
+
+impl Textarea {
+    pub fn backspace(&mut self) {
+        todo!()
+    }
+    pub fn pull_events(&mut self, rl: &mut RaylibHandle) -> bool {
+        let mut update = false;
+        while let Some(c) = rl.get_char_pressed() {
+            dbg!(c);
+            update = true;
+            dbg!(&self.text);
+            self.text.push(c);
+            dbg!(&self.text);
+            self.cursor_pos += 1;
+            dbg!(&self.text);
+        }
+        dbg!(&self.text);
+
+        while let Some(k) = rl.get_key_pressed() {
+            match k {
+                KeyboardKey::KEY_BACKSPACE => self.backspace(),
+                KeyboardKey::KEY_ENTER => {
+                    self.text.push('\n');
+                    self.cursor_pos += 1;
+                }
+                KeyboardKey::KEY_TAB => {
+                    self.text.push('\t');
+                    self.cursor_pos += 1;
+                }
+                _ => {}
+            }
+        }
+        if rl.is_key_pressed_repeat(KeyboardKey::KEY_BACKSPACE) {
+            self.backspace();
+        }
+        return update;
+    }
+}
+
 // makes main be too busy
 pub fn example(font: Font, fontsize: f32) -> World {
     let a = Rc::new(RefCell::new(Classe {
@@ -121,4 +165,15 @@ pub fn example(font: Font, fontsize: f32) -> World {
         ],
         style: Style { font, fontsize },
     }
+}
+
+pub fn update_world(
+    Textarea {
+        text,
+        cursor_pos,
+        area,
+    }: &Textarea,
+    w: &mut World,
+) {
+    todo!("not yet finished")
 }
