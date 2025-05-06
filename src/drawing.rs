@@ -185,15 +185,7 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
     }
 }
 
-pub fn draw_textarea(
-    d: &mut RaylibDrawHandle,
-    Textarea {
-        text,
-        cursor_pos,
-        area,
-    }: &Textarea,
-    style: &Style,
-) {
+pub fn draw_textarea(d: &mut RaylibDrawHandle, Textarea { text, area, .. }: &Textarea, s: &Style) {
     let ipos = Vector2 {
         x: area.x,
         y: area.y,
@@ -201,22 +193,20 @@ pub fn draw_textarea(
     let mut pos = ipos;
 
     if text.is_empty() {
-        d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
+        d.draw_text_ex(&s.font, "_", pos, s.fontsize, 0.0, Color::BLACK);
     }
 
-    let m = style.font.measure_text("-", style.fontsize, 0.0);
-    for (i, c) in text.chars().enumerate() {
-        let s = &c.to_string();
-
+    let m = s.font.measure_text("-", s.fontsize, 0.0);
+    for c in text.chars() {
         if c == '\n' {
-            pos.y += style.fontsize;
+            pos.y += s.fontsize;
             pos.x = ipos.x;
         } else if c == '\t' {
             pos.x += m.x * 4.0;
         } else {
-            d.draw_text_codepoints(&style.font, s, pos, style.fontsize, 0.0, Color::BLACK);
+            d.draw_text_codepoints(&s.font, &c.to_string(), pos, s.fontsize, 0.0, Color::BLACK);
             pos.x += m.x;
         }
     }
-    d.draw_text_ex(&style.font, "_", pos, style.fontsize, 0.0, Color::BLACK);
+    d.draw_text_ex(&s.font, "_", pos, s.fontsize, 0.0, Color::BLACK);
 }
