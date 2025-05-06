@@ -16,6 +16,7 @@ use raylib::{
 
 struct State {
     currently_held: Option<ClassPtr>,
+    textbox_up: bool,
 }
 
 fn main() {
@@ -28,7 +29,7 @@ fn main() {
     let font = rl
         .load_font(&thread, "external/Consolas/consolas.ttf")
         .expect("No font?");
-    //font.texture.set_texture_filter(thread);
+    unsafe { SetTextureFilter(font.texture, TextureFilter::TEXTURE_FILTER_TRILINEAR as i32) }
 
     let mut screen_width = 1000;
     let mut screen_height = 700;
@@ -36,6 +37,7 @@ fn main() {
     let mut w = example(font, 22.0);
     let mut st = State {
         currently_held: None,
+        textbox_up: false,
     };
 
     while !rl.window_should_close() {
@@ -53,6 +55,12 @@ fn main() {
         // Draw
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::RAYWHITE);
+        for x in (0..=screen_width).step_by(CELL_SIZE) {
+            d.draw_line(x, 0, x, screen_height, Color::LIGHTGRAY);
+        }
+        for y in (0..=screen_height).step_by(CELL_SIZE) {
+            d.draw_line(0, y, screen_width, y, Color::LIGHTGRAY);
+        }
 
         for class in &w.classes {
             draw_class(&mut d, &class.borrow(), &w.style);
@@ -60,12 +68,6 @@ fn main() {
         }
         for relation in &w.rels {
             draw_relacio(&mut d, relation, &w.style); // TODO: impl
-        }
-        for x in (0..=screen_width).step_by(CELL_SIZE) {
-            d.draw_line(x, 0, x, screen_height, Color::LIGHTGRAY);
-        }
-        for y in (0..=screen_height).step_by(CELL_SIZE) {
-            d.draw_line(0, y, screen_width, y, Color::LIGHTGRAY);
         }
         drop(d);
 
