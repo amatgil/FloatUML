@@ -119,7 +119,10 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
     for (component, multlower, multhigher) in &relacio.cs {
         let classe = component.deref().borrow_mut();
         let (arect, _, _, _) = rect_of(&classe, style);
-        let mut pt1 = int_seg_rect(rect_center(arect), punt_mig, arect);
+        let mut pt1 = match int_seg_rect(rect_center(arect), punt_mig, arect) {
+            Some(p) => p,
+            None => return,
+        };
         d.draw_line_ex(pt1, punt_mig, 3.0, Color::BLACK);
         let mult_text = format!(
             "{}..{}",
