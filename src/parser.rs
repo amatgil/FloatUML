@@ -1,14 +1,13 @@
 //! Classic system: parse_xxx : Result<(Parsed, Remaining), Unchanged>
 //! We only parse &str here
+//! (Accepts full utf8!!)
 
-#[derive(Debug)]
-struct ParserErr;
-type ParserRes<'a, T> = Result<(T, &'a str), ParserErr>;
+type ParserRes<'a, T> = Result<(T, &'a str), ()>;
 
 fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
     let mut indices = input.char_indices();
     let Some(first) = indices.next() else {
-        return Err(ParserErr);
+        return Err(());
     };
     if first.1 == c {
         match indices.next() {
@@ -16,7 +15,14 @@ fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
             None => Ok((&input[0..], "")),
         }
     } else {
-        Err(ParserErr)
+        Err(())
+    }
+}
+
+fn parse_word(input: &str, word: &str) -> ParserRes<&str> {
+    if input.len() < word.len() {
+        Err(())
+    } else {
     }
 }
 
