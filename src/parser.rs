@@ -5,24 +5,16 @@
 type ParserRes<'a, T> = Result<(T, &'a str), ()>;
 
 fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
-    let mut indices = input.char_indices();
-    let Some(first) = indices.next() else {
-        return Err(());
-    };
-    if first.1 == c {
-        match indices.next() {
-            Some(second) => Ok((&input[0..second.0], &input[second.0..])),
-            None => Ok((&input[0..], "")),
-        }
-    } else {
-        Err(())
+    match input.strip_prefix(c) {
+        Some(rest) => Ok((&input[0..c.len_utf8()], rest)),
+        None => Err(()),
     }
 }
 
-fn parse_word(input: &str, word: &str) -> ParserRes<&str> {
-    if input.len() < word.len() {
-        Err(())
-    } else {
+fn parse_word<'a>(input: &'a str, word: &'a str) -> ParserRes<'a, &'a str> {
+    match input.strip_prefix(word) {
+        Some(rest) => Ok((&input[0..word.bytes().len()], rest)),
+        None => Err(()),
     }
 }
 
