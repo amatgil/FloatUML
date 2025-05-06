@@ -78,7 +78,20 @@ pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
 }
 
 fn parse_int(input: &str) -> ParserRes<i32> {
-    todo!()
+    match parse_letter(input, '-') {
+        Some((_, inputt)) => {
+            let (n, input) = parse_nat(inputt)?;
+            Some((-1 * i32::try_from(n).ok()?, input))
+        }
+        None => {
+            let (n, input) = parse_nat(input)?;
+            Some((i32::try_from(n).ok()?, input))
+        }
+    }
+}
+fn parse_nat(input: &str) -> ParserRes<u32> {
+    let (nstr, input) = parse_until(input, |c| !c.is_digit(10))?;
+    Some((nstr.parse().ok()?, input))
 }
 
 #[test]
