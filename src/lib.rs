@@ -175,5 +175,7 @@ pub fn update_world(
     }: &Textarea,
     w: &mut World,
 ) {
+    let input = &*text;
+
     todo!("not yet finished")
 }

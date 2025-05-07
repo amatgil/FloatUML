@@ -78,7 +78,7 @@ fn main() {
             drop(d);
             let update_occurred = tarea.pull_events(&mut rl);
             if update_occurred {
-                //update_world(&tarea, &mut w);
+                update_world(&tarea, &mut w);
             }
         } else {
             let text = "F10 to toggle terminal";

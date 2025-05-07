@@ -4,7 +4,7 @@
 
 use raylib::math::Vector2;
 
-use crate::{Attribute, Classe};
+use crate::{Attribute, Classe, Multiplicitat, Relacio};
 
 type ParserRes<'a, T> = Option<(T, &'a str)>;
 
@@ -78,6 +78,71 @@ pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
     ))
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ParsedRelacio<'a> {
+    cs_names: Vec<(&'a str, Multiplicitat, Multiplicitat)>,
+    assoc_name: &'a str,
+}
+fn parse_multiplicitat(input: &str) -> ParserRes<Multiplicitat> {
+    let input = input.trim();
+    match parse_word(input, "*") {
+        Some((a, input)) => Some((None, input)),
+        None => {
+            let (m, input) = parse_nat(input)?;
+            Some((Some(m), input))
+        }
+    }
+}
+
+fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
+    let input = input.trim();
+    let mut cs_names = vec![];
+    let (_rel, input) = parse_word(input, "rel")?;
+    let (assoc_name, input) = parse_until(input, char::is_whitespace)?;
+    let (_lb, mut input) = parse_word(input, "{")?;
+
+    while let Some((nom_c, inputt)) = parse_until(input, char::is_whitespace) {
+        dbg!(nom_c);
+        let (lower, inputt) = parse_multiplicitat(inputt)?;
+        let (higher, inputt) = parse_multiplicitat(inputt)?;
+        input = inputt;
+        cs_names.push((nom_c, lower, higher));
+    }
+
+    let (_rb, input) = parse_word(input, "}")?;
+
+    Some((
+        ParsedRelacio {
+            cs_names,
+            assoc_name,
+        },
+        input,
+    ))
+}
+
+fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
+    let mut parsed_classes = vec![];
+    let mut parsed_rels = vec![];
+
+    loop {
+        if let Some((c, inputt)) = parse_classe(input) {
+            parsed_classes.push(c);
+            input = inputt;
+        } else if let Some((r, inputt)) = parse_rel(input) {
+            todo!();
+            //parsed_rels.push(r);
+            input = inputt;
+        } else {
+            break;
+        }
+    }
+
+    input
+        .trim()
+        .is_empty()
+        .then_some((parsed_classes, parsed_rels))
+}
+
 fn parse_int(input: &str) -> ParserRes<i32> {
     match parse_letter(input, '-') {
         Some((_, inputt)) => {
@@ -149,4 +214,22 @@ fn single_letter_test() {
     let (a, input) = parse_letter(input, 'a').unwrap();
     assert_eq!(a, "a");
     assert_eq!(input, "")
+}
+
+#[test]
+fn relacio_test() {
+    let text = "rel asss { A 0 0 B * 2 C 3 5 }";
+    let (tal, input) = parse_rel(text).unwrap();
+    assert_eq!(input, "");
+    assert_eq!(
+        tal,
+        ParsedRelacio {
+            cs_names: vec![
+                ("A", Some(0), Some(0)),
+                ("B", None, Some(2)),
+                ("C", Some(3), Some(5))
+            ],
+            assoc_name: "asss"
+        }
+    );
 }
