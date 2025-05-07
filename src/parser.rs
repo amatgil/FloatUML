@@ -258,7 +258,14 @@ fn relacio_test() {
                 ("B", None, Some(2)),
                 ("C", Some(3), Some(5))
             ],
-            assoc_name: "asss"
+            assoc_name: Some("asss")
         }
     );
+}
+
+#[test]
+fn full_test() {
+    let text = "classe A { id: String } classe B { tal: Qual } rel { A 0 0 B 1 1 }";
+    let (classes, rels) = parse_full_text(text).unwrap();
+    todo!()
 }
