@@ -2,9 +2,11 @@
 //! We only parse &str here
 //! (Accepts full utf8!!)
 
+use std::{cell::RefCell, rc::Rc};
+
 use raylib::math::Vector2;
 
-use crate::{Attribute, Classe, Multiplicitat, Relacio};
+use crate::{Attribute, ClassPtr, Classe, Multiplicitat, Relacio};
 
 type ParserRes<'a, T> = Option<(T, &'a str)>;
 
@@ -81,7 +83,7 @@ pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
 #[derive(Debug, PartialEq, Eq)]
 struct ParsedRelacio<'a> {
     cs_names: Vec<(&'a str, Multiplicitat, Multiplicitat)>,
-    assoc_name: &'a str,
+    assoc_name: Option<&'a str>,
 }
 fn parse_multiplicitat(input: &str) -> ParserRes<Multiplicitat> {
     let input = input.trim();
@@ -98,7 +100,10 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     let input = input.trim();
     let mut cs_names = vec![];
     let (_rel, input) = parse_word(input, "rel")?;
-    let (assoc_name, input) = parse_until(input, char::is_whitespace)?;
+    let (assoc_name, input) = match parse_until(input, char::is_whitespace) {
+        Some((aname, t)) => (Some(aname), t),
+        None => (None, input),
+    };
     let (_lb, mut input) = parse_word(input, "{")?;
 
     while let Some((nom_c, inputt)) = parse_until(input, char::is_whitespace) {
@@ -121,6 +126,10 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
 }
 
 fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
+    fn find_classe(classes: &[ClassPtr], name: &str) -> Option<ClassPtr> {
+        todo!()
+    }
+
     let mut parsed_classes = vec![];
     let mut parsed_rels = vec![];
 
@@ -129,18 +138,31 @@ fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
             parsed_classes.push(c);
             input = inputt;
         } else if let Some((r, inputt)) = parse_rel(input) {
-            todo!();
-            //parsed_rels.push(r);
+            parsed_rels.push(r);
             input = inputt;
         } else {
             break;
         }
     }
 
-    input
-        .trim()
-        .is_empty()
-        .then_some((parsed_classes, parsed_rels))
+    let classes: Vec<ClassPtr> = parsed_classes
+        .into_iter()
+        .map(|pc| Rc::new(RefCell::new(pc)))
+        .collect();
+
+    let rels: Vec<_> = parsed_rels
+        .into_iter()
+        .map(|pr| Relacio {
+            cs: todo!(), /*pr
+                         .cs_names
+                         .into_iter()
+                         .map(|(name, lower, higher)| find_classe(&classes, &name)?),*/
+            associativa: pr.assoc_name.and_then(|aname| find_classe(&classes, aname)),
+        })
+        .collect();
+
+    todo!()
+    //input.trim().is_empty().then_some((classes, parsed_rels))
 }
 
 fn parse_int(input: &str) -> ParserRes<i32> {
