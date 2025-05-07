@@ -2,7 +2,7 @@
 //! We only parse &str here
 //! (Accepts full utf8!!)
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use raylib::math::Vector2;
 
@@ -127,7 +127,7 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
 
 fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
     fn find_classe(classes: &[ClassPtr], name: &str) -> Option<ClassPtr> {
-        todo!()
+        classes.iter().find(|c| c.borrow().nom == name).cloned()
     }
     fn get_classes_from_name(
         classes: &[ClassPtr],
