@@ -18,10 +18,10 @@ fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
     }
 }
 
-fn parse_word<'a>(input: &'a str, word: &'a str) -> ParserRes<'a, &'a str> {
+fn parse_assert_word<'a>(input: &'a str, word: &'a str) -> ParserRes<'a, ()> {
     let input = input.trim();
     match input.strip_prefix(word) {
-        Some(rest) => Some((&input[0..word.bytes().len()].trim(), rest.trim())),
+        Some(rest) => Some(((), rest.trim())),
         None => None,
     }
 }
@@ -39,16 +39,16 @@ where
 
 pub fn parse_classe(input: &str) -> ParserRes<Classe> {
     let input = input.trim();
-    let (_classe, input) = parse_word(input, "classe")?;
+    let (_classe, input) = parse_assert_word(input, "classe")?;
     let (nom, input) = parse_until(input, char::is_whitespace)?;
-    let (_, mut input) = parse_word(input, "{")?;
+    let (_, mut input) = parse_assert_word(input, "{")?;
 
     let mut attribs = vec![];
     while let Some((at, inputt)) = parse_attrib(input) {
         attribs.push(at);
         input = inputt;
     }
-    let (_, input) = parse_word(input, "}")?;
+    let (_, input) = parse_assert_word(input, "}")?;
 
     Some((
         Classe {
@@ -87,7 +87,7 @@ struct ParsedRelacio<'a> {
 }
 fn parse_multiplicitat(input: &str) -> ParserRes<Multiplicitat> {
     let input = input.trim();
-    match parse_word(input, "*") {
+    match parse_assert_word(input, "*") {
         Some((a, input)) => Some((None, input)),
         None => {
             let (m, input) = parse_nat(input)?;
@@ -99,22 +99,21 @@ fn parse_multiplicitat(input: &str) -> ParserRes<Multiplicitat> {
 fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     let input = input.trim();
     let mut cs_names = vec![];
-    let (_rel, input) = parse_word(input, "rel")?;
+    let (_rel, input) = parse_assert_word(input, "rel")?;
     let (assoc_name, input) = match parse_until(input, char::is_whitespace) {
-        Some((aname, t)) => (Some(aname), t),
-        None => (None, input),
+        Some((aname, t)) if aname != "{" => (Some(aname), t),
+        _ => (None, input),
     };
-    let (_lb, mut input) = parse_word(input, "{")?;
+    let (_lb, mut input) = parse_assert_word(input, "{")?;
 
     while let Some((nom_c, inputt)) = parse_until(input, char::is_whitespace) {
-        dbg!(nom_c);
         let (lower, inputt) = parse_multiplicitat(inputt)?;
         let (higher, inputt) = parse_multiplicitat(inputt)?;
         input = inputt;
         cs_names.push((nom_c, lower, higher));
     }
 
-    let (_rb, input) = parse_word(input, "}")?;
+    let (_rb, input) = parse_assert_word(input, "}")?;
 
     Some((
         ParsedRelacio {
@@ -264,7 +263,28 @@ fn relacio_test() {
 
 #[test]
 fn full_test() {
-    let text = "classe A { id: String } classe B { tal: Qual } rel { A 0 0 B 1 1 }";
+    let text = "classe A { id: String } classe B { tal: Qual } rel { A 0 * B 1 2 }";
     let (classes, rels) = parse_full_text(text).unwrap();
-    todo!()
+    assert_eq!(classes.len(), 2);
+    assert_eq!(rels.len(), 1);
+
+    for cl in &classes {
+        let c = cl.borrow();
+        assert!(c.nom == "A".to_string() || c.nom == "B".to_string());
+        assert_eq!(c.attribs.len(), 1);
+        for at in &c.attribs {
+            assert!(at.nom == "id".to_string() || at.nom == "tal");
+            assert!(at.tipus == "String".to_string() || at.tipus == "Qual");
+        }
+    }
+    let rel = &rels[0];
+    assert_eq!(rel.cs[0].0, classes[0]);
+    assert_eq!(rel.cs[0].1, Some(0));
+    assert_eq!(rel.cs[0].2, None);
+
+    assert_eq!(rel.cs[1].0, classes[1]);
+    assert_eq!(rel.cs[1].1, Some(1));
+    assert_eq!(rel.cs[1].2, Some(2));
+
+    assert!(rel.associativa.is_none());
 }
