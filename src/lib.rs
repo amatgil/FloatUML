@@ -2,13 +2,14 @@ pub mod drawing;
 pub mod parser;
 pub mod utils;
 
+use parser::parse_full_text;
 use raylib::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 
 pub type Multiplicitat = Option<u32>;
 pub type ClassPtr = Rc<RefCell<Classe>>;
 
-pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 4.0;
+pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 3.0;
 pub const CELL_SIZE: usize = 32;
 
 #[derive(Debug, PartialEq)] // No clone expressament
@@ -51,6 +52,15 @@ pub struct Textarea {
     pub area: Rectangle,
 }
 
+impl World {
+    pub fn new(font: Font, fontsize: f32) -> Self {
+        Self {
+            classes: vec![],
+            rels: vec![],
+            style: Style { font, fontsize },
+        }
+    }
+}
 impl Textarea {
     pub fn backspace(&mut self) {
         if self.cursor_pos > 0 {
@@ -167,15 +177,20 @@ pub fn example(font: Font, fontsize: f32) -> World {
     }
 }
 
-pub fn update_world(
-    Textarea {
-        text,
-        cursor_pos,
-        area,
-    }: &Textarea,
-    w: &mut World,
-) {
-    let input = &*text;
+pub fn update_world(Textarea { text, .. }: &Textarea, w: &mut World) {
+    if let Some((mut new_classes, new_rels)) = parse_full_text(&text) {
+        let old_classes = &w.classes;
+        let old_rels = &w.rels;
+        for new_class in &mut new_classes {
+            if let Some(old_class) = old_classes
+                .iter()
+                .find(|oldc| oldc.borrow().nom == new_class.borrow().nom)
+            {
+                new_class.borrow_mut().pos = old_class.borrow().pos;
+            }
+        }
 
-    todo!("not yet finished")
+        w.classes = new_classes;
+        w.rels = new_rels;
+    }
 }

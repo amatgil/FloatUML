@@ -124,7 +124,7 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     ))
 }
 
-fn parse_full_text(mut input: &str) -> Option<(Vec<ClassPtr>, Vec<Relacio>)> {
+pub fn parse_full_text(mut input: &str) -> Option<(Vec<ClassPtr>, Vec<Relacio>)> {
     fn find_classe(classes: &[ClassPtr], name: &str) -> Option<ClassPtr> {
         classes.iter().find(|c| c.borrow().nom == name).cloned()
     }

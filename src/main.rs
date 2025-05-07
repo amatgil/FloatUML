@@ -30,7 +30,7 @@ fn main() {
     let mut screen_width = 1000;
     let mut screen_height = 700;
 
-    let mut w = example(font, 22.0);
+    let mut w = World::new(font, 22.0);
     let mut st = State {
         currently_held: None,
         textbox_up: false,
