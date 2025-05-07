@@ -129,6 +129,16 @@ fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
     fn find_classe(classes: &[ClassPtr], name: &str) -> Option<ClassPtr> {
         todo!()
     }
+    fn get_classes_from_name(
+        classes: &[ClassPtr],
+        names: &[(&str, Multiplicitat, Multiplicitat)],
+    ) -> Option<Vec<(ClassPtr, Multiplicitat, Multiplicitat)>> {
+        let mut ret = vec![];
+        for (name, l, h) in names {
+            ret.push(((find_classe(classes, name)?), *l, *h));
+        }
+        Some(ret)
+    }
 
     let mut parsed_classes = vec![];
     let mut parsed_rels = vec![];
@@ -150,16 +160,13 @@ fn parse_full_text(mut input: &str) -> Option<(Vec<Classe>, Vec<Relacio>)> {
         .map(|pc| Rc::new(RefCell::new(pc)))
         .collect();
 
-    let rels: Vec<_> = parsed_rels
-        .into_iter()
-        .map(|pr| Relacio {
-            cs: todo!(), /*pr
-                         .cs_names
-                         .into_iter()
-                         .map(|(name, lower, higher)| find_classe(&classes, &name)?),*/
+    let mut rels = vec![];
+    for pr in parsed_rels {
+        rels.push(Relacio {
+            cs: get_classes_from_name(&classes, &pr.cs_names)?,
             associativa: pr.assoc_name.and_then(|aname| find_classe(&classes, aname)),
         })
-        .collect();
+    }
 
     todo!()
     //input.trim().is_empty().then_some((classes, parsed_rels))
