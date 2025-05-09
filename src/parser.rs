@@ -12,6 +12,10 @@ type ParserRes<'a, T> = Option<(T, &'a str)>;
 
 const RESERVED_CHARS: [char; 4] = [':', ',', '{', '}'];
 
+fn is_reserved(c: char) -> bool {
+    c.is_whitespace() || RESERVED_CHARS.contains(&c)
+}
+
 fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
     let input = input.trim();
     match input.strip_prefix(c) {
@@ -43,7 +47,7 @@ pub fn parse_classe(input: &str) -> ParserRes<Classe> {
     let input = input.trim();
     let (_classe, input) =
         parse_assert_word(input, "classe").or_else(|| parse_assert_word(input, "class"))?;
-    let (nom, input) = parse_until(input, char::is_whitespace)?;
+    let (nom, input) = parse_until(input, is_reserved)?;
     let (_, mut input) = parse_assert_word(input, "{")?;
 
     let mut attribs = vec![];
@@ -69,9 +73,9 @@ pub fn parse_classe(input: &str) -> ParserRes<Classe> {
 
 pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
     let input = input.trim();
-    let (nom, input) = parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))?;
+    let (nom, input) = parse_until(input, is_reserved)?;
     let (_colon, input) = parse_letter(input, ':')?;
-    let (tipus, input) = parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))?;
+    let (tipus, input) = parse_until(input, is_reserved)?;
     //let (multmin, input) = parse_int(input)?;
     //let (multmax, input) = parse_int(input)?;
 
@@ -106,16 +110,14 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     let input = input.trim();
     let mut cs_names = vec![];
     let (_rel, input) = parse_assert_word(input, "rel")?;
-    let (assoc_name, input) = match parse_until(input, char::is_whitespace) {
+    let (assoc_name, input) = match parse_until(input, is_reserved) {
         Some((aname, t)) if aname != "{" => (Some(aname), t),
         _ => (None, input),
     };
     let (_lb, mut input) = parse_assert_word(input, "{")?;
 
     dbg!(input);
-    while let Some((nom_c, inputt)) =
-        parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))
-    {
+    while let Some((nom_c, inputt)) = parse_until(input, is_reserved) {
         if nom_c.is_empty() {
             break;
         }
