@@ -11,6 +11,7 @@ pub type ClassPtr = Rc<RefCell<Classe>>;
 
 pub const PERCENTATGE_MIDA_TEXTBOX: f32 = 3.0;
 pub const CELL_SIZE: usize = 32;
+pub const MIN_CLASS_WIDTH: f32 = 100.0; // TODO: implement this
 
 #[derive(Debug, PartialEq)] // No clone expressament
 pub struct Classe {

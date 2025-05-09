@@ -183,6 +183,11 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
 
         d.draw_text_ex(&style.font, &mult_text, pt1, 20.0, 0.0, Color::BLACK);
     }
+
+    if let Some(ass) = &relacio.associativa {
+        let punt_mig = calcul_punt_mig(relacio, style);
+        draw_assoc(d, &ass.borrow(), punt_mig, style);
+    }
 }
 
 pub fn draw_textarea(d: &mut RaylibDrawHandle, Textarea { text, area, .. }: &Textarea, s: &Style) {
@@ -209,4 +214,26 @@ pub fn draw_textarea(d: &mut RaylibDrawHandle, Textarea { text, area, .. }: &Tex
         }
     }
     d.draw_text_ex(&s.font, "_", pos, s.fontsize, 0.0, Color::BLACK);
+}
+
+pub fn draw_assoc(
+    d: &mut RaylibDrawHandle,
+    c: &Classe,
+    punt_mig: Vector2,
+    s: &Style,
+) -> Option<()> {
+    let (arect, ..) = rect_of(&c, s);
+    let pt1 = int_seg_rect(rect_center(arect), punt_mig, arect)?;
+    let mut line = punt_mig;
+    let mut v = pt1 - line;
+    let len = v.length();
+    v.normalize();
+
+    for _ in 0..10 {
+        let inc = len / 20.0;
+        let suma = line + v.scale_by(inc);
+        d.draw_line_ex(line, suma, 3.0, Color::BLACK);
+        line = line + v.scale_by(inc * 2.0);
+    }
+    Some(())
 }
