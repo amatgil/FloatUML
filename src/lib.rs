@@ -78,6 +78,7 @@ impl Textarea {
         }
 
         while let Some(k) = rl.get_key_pressed() {
+            update = true;
             match k {
                 KeyboardKey::KEY_BACKSPACE => self.backspace(),
                 KeyboardKey::KEY_ENTER => {
@@ -181,7 +182,6 @@ pub fn example(font: Font, fontsize: f32) -> World {
 pub fn update_world(Textarea { text, .. }: &Textarea, w: &mut World) {
     if let Some((mut new_classes, new_rels)) = parse_full_text(&text) {
         let old_classes = &w.classes;
-        let old_rels = &w.rels;
         for new_class in &mut new_classes {
             if let Some(old_class) = old_classes
                 .iter()

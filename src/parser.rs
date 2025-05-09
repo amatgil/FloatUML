@@ -124,7 +124,7 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
             cs_names,
             assoc_name,
         },
-        input,
+        input.trim(),
     ))
 }
 
@@ -147,12 +147,13 @@ pub fn parse_full_text(mut input: &str) -> Option<(Vec<ClassPtr>, Vec<Relacio>)>
     let mut parsed_rels = vec![];
 
     loop {
+        dbg!(input);
         if let Some((c, inputt)) = parse_classe(input) {
             parsed_classes.push(c);
-            input = inputt;
+            input = inputt.trim();
         } else if let Some((r, inputt)) = parse_rel(input) {
             parsed_rels.push(r);
-            input = inputt;
+            input = inputt.trim();
         } else {
             break;
         }
