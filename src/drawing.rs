@@ -183,6 +183,11 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
         d.draw_text_ex(&style.font, &mult_text, pt1, 20.0, 0.0, Color::BLACK);
     }
 
+    if let Some(ass) = &relacio.associativa {
+        let punt_mig = calcul_punt_mig(relacio, style);
+        draw_assoc(d, &ass.borrow(), punt_mig, style);
+    }
+
     if relacio.cs.len() > 2 {
         let rect_l = Rectangle {
             x: punt_mig.x,
@@ -198,11 +203,6 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
             height: 36.0,
         };
         d.draw_rectangle_pro(rect_c, Vector2::new(18.0, 18.0), 45.0, Color::WHITE);
-    }
-
-    if let Some(ass) = &relacio.associativa {
-        let punt_mig = calcul_punt_mig(relacio, style);
-        draw_assoc(d, &ass.borrow(), punt_mig, style);
     }
 }
 
