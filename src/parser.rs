@@ -10,6 +10,8 @@ use crate::{Attribute, ClassPtr, Classe, Multiplicitat, Relacio};
 
 type ParserRes<'a, T> = Option<(T, &'a str)>;
 
+const RESERVED_CHARS: [char; 4] = [':', ',', '{', '}'];
+
 fn parse_letter(input: &str, c: char) -> ParserRes<&str> {
     let input = input.trim();
     match input.strip_prefix(c) {
@@ -67,9 +69,9 @@ pub fn parse_classe(input: &str) -> ParserRes<Classe> {
 
 pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
     let input = input.trim();
-    let (nom, input) = parse_until(input, |c| c.is_whitespace() || c == ':')?;
+    let (nom, input) = parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))?;
     let (_colon, input) = parse_letter(input, ':')?;
-    let (tipus, input) = parse_until(input, |c| c.is_whitespace() || c == '}' || c == ',')?;
+    let (tipus, input) = parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))?;
     //let (multmin, input) = parse_int(input)?;
     //let (multmax, input) = parse_int(input)?;
 
@@ -110,14 +112,22 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     };
     let (_lb, mut input) = parse_assert_word(input, "{")?;
 
-    while let Some((nom_c, inputt)) = parse_until(input, char::is_whitespace) {
+    dbg!(input);
+    while let Some((nom_c, inputt)) =
+        parse_until(input, |c| c.is_whitespace() || RESERVED_CHARS.contains(&c))
+    {
+        if nom_c.is_empty() {
+            break;
+        }
         let (lower, inputt) = parse_multiplicitat(inputt)?;
         let (higher, inputt) = parse_multiplicitat(inputt)?;
         input = inputt;
+        dbg!(input);
         cs_names.push((nom_c, lower, higher));
     }
 
     let (_rb, input) = parse_assert_word(input, "}")?;
+    dbg!(input);
 
     Some((
         ParsedRelacio {
