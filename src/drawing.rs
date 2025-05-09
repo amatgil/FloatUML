@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{f32::consts::TAU, ops::Deref};
 
 use crate::*;
 
@@ -129,7 +129,6 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
             multlower.map_or(String::from("*"), |m| m.to_string()),
             multhigher.map_or(String::from("*"), |m| m.to_string())
         );
-        use raylib::prelude::*;
 
         if pt1.x == arect.x || pt1.x == arect.x + arect.width {
             if pt1.x == arect.x {
@@ -182,6 +181,23 @@ pub fn draw_relacio(d: &mut RaylibDrawHandle, relacio: &Relacio, style: &Style) 
         }
 
         d.draw_text_ex(&style.font, &mult_text, pt1, 20.0, 0.0, Color::BLACK);
+    }
+
+    if relacio.cs.len() > 2 {
+        let rect_l = Rectangle {
+            x: punt_mig.x,
+            y: punt_mig.y,
+            width: 40.0,
+            height: 40.0,
+        };
+        d.draw_rectangle_pro(rect_l, Vector2::new(20.0, 20.0), 45.0, Color::BLACK);
+        let rect_c = Rectangle {
+            x: punt_mig.x,
+            y: punt_mig.y,
+            width: 36.0,
+            height: 36.0,
+        };
+        d.draw_rectangle_pro(rect_c, Vector2::new(18.0, 18.0), 45.0, Color::WHITE);
     }
 
     if let Some(ass) = &relacio.associativa {

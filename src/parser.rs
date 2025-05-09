@@ -116,7 +116,6 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
     };
     let (_lb, mut input) = parse_assert_word(input, "{")?;
 
-    dbg!(input);
     while let Some((nom_c, inputt)) = parse_until(input, is_reserved) {
         if nom_c.is_empty() {
             break;
@@ -124,12 +123,10 @@ fn parse_rel(input: &str) -> ParserRes<ParsedRelacio> {
         let (lower, inputt) = parse_multiplicitat(inputt)?;
         let (higher, inputt) = parse_multiplicitat(inputt)?;
         input = inputt;
-        dbg!(input);
         cs_names.push((nom_c, lower, higher));
     }
 
     let (_rb, input) = parse_assert_word(input, "}")?;
-    dbg!(input);
 
     Some((
         ParsedRelacio {
@@ -159,7 +156,6 @@ pub fn parse_full_text(mut input: &str) -> Option<(Vec<ClassPtr>, Vec<Relacio>)>
     let mut parsed_rels = vec![];
 
     loop {
-        dbg!(input);
         if let Some((c, inputt)) = parse_classe(input) {
             parsed_classes.push(c);
             input = inputt.trim();
