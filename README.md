@@ -2,6 +2,7 @@
 ## Examples
 
 ![Basic example of UML diagram](./examples/basic.png)
+![Ternary example](./examples/ternary.png)
 
 ## Usage
 Press F10 to enable text input. The format is as follows (square brackets mean optionality):
