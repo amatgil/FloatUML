@@ -39,7 +39,8 @@ where
 
 pub fn parse_classe(input: &str) -> ParserRes<Classe> {
     let input = input.trim();
-    let (_classe, input) = parse_assert_word(input, "classe")?;
+    let (_classe, input) =
+        parse_assert_word(input, "classe").or_else(|| parse_assert_word(input, "class"))?;
     let (nom, input) = parse_until(input, char::is_whitespace)?;
     let (_, mut input) = parse_assert_word(input, "{")?;
 
@@ -65,7 +66,7 @@ pub fn parse_attrib(input: &str) -> ParserRes<Attribute> {
     let input = input.trim();
     let (nom, input) = parse_until(input, |c| c.is_whitespace() || c == ':')?;
     let (_colon, input) = parse_letter(input, ':')?;
-    let (tipus, input) = parse_until(input, char::is_whitespace)?;
+    let (tipus, input) = parse_until(input, |c| c.is_whitespace() || c == '}')?;
     //let (multmin, input) = parse_int(input)?;
     //let (multmax, input) = parse_int(input)?;
 
